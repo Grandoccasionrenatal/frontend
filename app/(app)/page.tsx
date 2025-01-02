@@ -30,10 +30,6 @@ const Reviews = dynamic(() => import('@/components/sections/Reviews'), { ssr: fa
 export const revalidate = 60;
 
 const page = async () => {
-
-
-
-  
   const heroStatisticsData: Promise<apiInterface<heroStatInterface[]>> =
     otherServices.getHeroStatistic(
       qs.stringify({
@@ -240,18 +236,20 @@ const page = async () => {
       </section>
 
       <section
-        className={`relative h-[70vh] w-full container px-container-base lg:px-container-lg overflow-hidden`}
+        className={`relative h-[70vh] w-full container px-container-base lg:px-container-lg overflow-hidden border`}
       >
         <div className="absolute top-[20%] text-white md:top-[10%] w-full h-full flex flex-col z-[1]">
-          <h3 className=" text-[32px] leading-[42px] w-full md:text-[60px] font-[700] max-w-[330px] md:max-w-[32rem] md:leading-[64px] mb-4 tracking-tighter">
-            Elevate Your <br className="md:hidden" /> Events and Occasions.
+          <h3 className=" text-[32px] leading-[42px] w-full md:text-[60px] font-[900] max-w-[330px] md:max-w-[45rem] md:leading-[64px] mb-8">
+            {/* Elevate Your <br className="md:hidden" /> Events and Occasions. */}
+            One-Stop Party Rentals
           </h3>
-          <p className="text-[18px] leading-[20px] font-[600] mb-8 max-w-[300px]">
-            Discover Premium Equipment Rentals for Every Occasion.
+          <p className="text-[18px] leading-[20px] font-[600] mb-12 max-w-[300px]">
+            {/* Discover Premium Equipment Rentals for Every Occasion. */}
+            Marquee, Chairs, Tables, Props and More. Hassle-Free & Delivered to You.
           </p>
           <Link href={`/${CONSTANTS.ROUTES.products}`}>
             <button className="w-max h-[3rem] px-4 font-sans rounded-[23px] border bg-orange-1 text-white hover:opacity-90 transition-opacity duration-300 ease-in-out font-[500]">
-              Browse Products
+              Hire Now
             </button>
           </Link>
         </div>
