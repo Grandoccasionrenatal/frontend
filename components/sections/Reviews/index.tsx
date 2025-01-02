@@ -90,9 +90,9 @@ const Reviews = () => {
               }
             ] as { name: string; review: string }[]
           ) ?.map((i, idx) => ( */}
-          {reviews?.map((i) => ( 
+          {reviews?.map((i, idx) => ( 
             <div key={i?.id} className={cn(`keen-slider__slide`, `w-full`)}>
-              <div className="w-full flex flex-col gap-[2rem] items-center justify-center min-h-[30vh]">
+              <div className="w-full flex flex-col gap-[2rem] items-center justify-center min-h-[30vh] overflow-hidden">
                 <svg
                   height="64px"
                   width="64px"
