@@ -3,24 +3,45 @@
 import otherServices from '@/adapters/others';
 import { cn } from '@/lib/utils';
 import { advertisementInterface, apiInterface, reviewInterface } from '@/types/api.types';
+import { shimmer, toBase64 } from '@/utils/shimmer';
 import { useKeenSlider } from 'keen-slider/react';
+import Image from 'next/image';
 import qs from 'qs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const Reviews = () => {
   const [currentSlide, setCurrentSlide] = useState<any>(0);
   const [reviews, setReviews] = useState<reviewInterface[]>([]);
   const [loaded, setLoaded] = useState<any>(false);
 
-  const reviewsData: Promise<apiInterface<reviewInterface[]>> = otherServices.getReviews();
-
-  reviewsData.then((res) => {
-    console.log(res.data);
-
-    setReviews(res.data);
-  });
+  // const reviewsData: Promise<apiInterface<reviewInterface[]>> = otherServices.getReviews();
 
 
+
+  // useEffect(()=>{
+
+    
+  //   reviewsData.then((res) => {
+  //     console.log(res.data);
+  
+  //     setReviews(res.data);
+  //   });
+  // },[])
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        // Now we call the endpoint just once
+        const res = await otherServices.getReviews();
+        console.log(res.data);
+        setReviews(res.data);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+  
+    fetchReviews();
+  }, []);
+  
 
   const [sliderRef, instanceRef] = useKeenSlider(
     {
@@ -74,25 +95,22 @@ const Reviews = () => {
     ]
   );
 
+  useEffect(() => {
+    // If the slider is created (loaded === true), and we have new reviews
+    if (loaded && instanceRef.current) {
+      instanceRef.current.update();
+    }
+  }, [reviews, loaded]);
+
   return (
     <section className="container relative w-full py-12 bg-slate-100 rounded-custom">
       <div className="relative max-h-[400px]">
         <div ref={sliderRef} className="keen-slider">
-          {/* {(
-            [
-              {
-                name: `Sarah and Michael`,
-                review: `The team at Grand Occasions turned our daughter’s first birthday into a reality. The equipment they provided was of top-notch quality and they paid attention to details`
-              },
-              {
-                name: `Damilola Afolabi`,
-                review: `As an event planner, we have worked with many companies but Grand Occasions goes above and beyond to satisfy their customers. They have exceptional service and the selection of equipment is unmatchable. `
-              }
-            ] as { name: string; review: string }[]
-          ) ?.map((i, idx) => ( */}
-          {reviews?.map((i, idx) => ( 
-            <div key={i?.id} className={cn(`keen-slider__slide`, `w-full`)}>
-              <div className="w-full flex flex-col gap-[2rem] items-center justify-center min-h-[30vh] overflow-hidden">
+          {
+                   
+          reviews?.map((i, idx) => (
+            <div key={idx} className={cn(`keen-slider__slide`, `w-full`)}>
+              <div className="w-full flex flex-col gap-[2rem] items-center justify-center min-h-[30vh]">
                 <svg
                   height="64px"
                   width="64px"
@@ -122,18 +140,20 @@ const Reviews = () => {
                     </g>{' '}
                   </g>
                 </svg>
-                <p className="max-w-[40rem] font-[600] text-center">{i?.attributes?.review}</p>
+                <p className="max-w-[40rem] font-[600] text-center">{i?.attributes.review}</p>
                 <div className="flex items-center gap-2">
-                  {/* <div className="w-[60px] relative h-[60px] overflow-hidden rounded-[50px]">
+                     {/* <div className="w-[60px] relative h-[60px] overflow-hidden rounded-[50px]">
                   <Image
-                    placeholder={`blur`}
-                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
-                    fill={true}
-                    alt=""
-                    className="w-full h-auto bg-center bg-contain"
-                    src="https://i0.wp.com/africavarsities.com/wp-content/uploads/2019/07/Hamamat-photo.jpg?resize=713%2C983&ssl=1"
-                  />
-                </div> */}
+                width={100}
+                height={400}
+                  // placeholder={`blur`}
+                  // blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
+                  // fill={true}
+                  alt=""
+                  className="w-full h-auto bg-center bg-contain"
+                  src="https://i0.wp.com/africavarsities.com/wp-content/uploads/2019/07/Hamamat-photo.jpg?resize=713%2C983&ssl=1"
+                />  
+                  </div>*/}
                   <div className="flex flex-col items-center">
                     <span className="font-[700] text-[18px]">{i?.attributes?.name}</span>
                     <div className="flex items-center gap-[4px]">
@@ -160,6 +180,7 @@ const Reviews = () => {
               </div>
             </div>
           ))}
+
         </div>
         {loaded && instanceRef.current && (
           <>

@@ -209,6 +209,9 @@ export interface reviewInterface{
   id: number;
   attributes: {
     name:string;
-    review:string
+    review:string;
+    publishedAt:string
+    updatedAt: string
+
   }
 }
