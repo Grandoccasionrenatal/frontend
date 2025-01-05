@@ -38,7 +38,7 @@ export function capitalizeText(input: string, capitalizeOption: 'firstWord' | 'a
 
 export function getInitials(input: string): string {
   // Split the input string into words
-  const words = input.split(' ');
+  const words = input?.split(' ');
 
   // Initialize an empty string to store the initials
   let initials = '';
@@ -57,7 +57,7 @@ export function isImageOrVideo(src: string): 'image' | 'video' | null {
   const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
   const videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
 
-  const extension = src.split('.').pop()?.toLowerCase();
+  const extension = src?.split('.').pop()?.toLowerCase();
 
   if (extension && imageExtensions.includes(extension)) {
     return 'image';
