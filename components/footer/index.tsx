@@ -163,7 +163,7 @@ const Footer = () => {
         </div>
         <div className="w-full border-t border-t-white/30 py-8 flex items-center justify-center">
           <span className="text-[12px] text-white/70">
-            Copyright © 2023 All rights reserved | Website Design by Dero
+            Copyright © 2025 All rights reserved
           </span>
         </div>
       </div>
