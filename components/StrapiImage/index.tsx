@@ -36,8 +36,10 @@ const StrapiImage = ({ src, className, blurDataUrl, objectFit }: IStrapiImage) =
       loader={imageLoader}
       alt=""
       fill={true}
+      unoptimized
       src={src}
       placeholder={`blur`}
+      quality={100}
       objectFit={objectFit ?? 'cover'}
       objectPosition="center"
       blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}

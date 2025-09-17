@@ -34,8 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
 .env
+.env.development
 merge.js
 
 merged-tsx-files.txt
