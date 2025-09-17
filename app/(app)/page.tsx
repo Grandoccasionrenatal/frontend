@@ -239,9 +239,9 @@ const page = async () => {
         className={`relative h-[70vh] w-full container px-container-base lg:px-container-lg overflow-hidden border`}
       >
         <div className="absolute top-[20%] text-white md:top-[10%] w-full h-full flex flex-col z-[1]">
-          <h3 className=" text-[32px] leading-[42px] w-full md:text-[60px] font-[900] max-w-[330px] md:max-w-[45rem] md:leading-[64px] mb-8">
+          <h1 className=" text-[32px] leading-[42px] w-full md:text-[60px] font-[900] max-w-[330px] md:max-w-[45rem] md:leading-[64px] mb-8">
             One-Stop Party Rentals
-          </h3>
+          </h1>
           <p className="text-[25px] leading-[22px] font-[700] mb-12 max-w-[500px]">
          
             Marquee, Chairs, Tables, Props and More. Hassle-Free & Delivered to You.
@@ -312,7 +312,7 @@ const page = async () => {
       {/* Product Range */}
       <section className="relative w-full py-12 px-container-base lg:px-nav-container-lg rounded-custom">
         <div className="w-full flex flex-col ">
-          <h4 className="text-center text-[32px] font-[700] mb-4">Product Range</h4>
+          <h1 className="text-center text-[32px] font-[700] mb-4">Product Range</h1>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[1rem] font-sans">
             {productCategories?.data?.map((i, idx) => (
               <div

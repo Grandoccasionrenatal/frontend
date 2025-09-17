@@ -8,14 +8,9 @@ const page = () => {
       <div className="flex flex-col gap- py-4">
 
         <HeroTitle/>
-        {/* <Link href={`/`}>
-          <h3 className="text-[22px] sm:text-[32px] leading-[40px] font-giliran font-[700]">
-            Grand Occasion <span className="text-[16px] font-sans text-start"> ™ </span>
-          </h3>
-        </Link> */}
-        <h3 className="text-[18px] text-center sm:text-[28px] leading-[40px] font-giliran font-[700] py-4">
+        <h1 className="text-[18px] text-center sm:text-[28px] leading-[40px] font-giliran font-[700] py-4">
           Terms Of Service
-        </h3>
+        </h1>
       </div>
       <div className="w-full h-screen flex-grow p-8">
         <iframe className="w-full h-full" src="/docs/terms_of_Service.html" />

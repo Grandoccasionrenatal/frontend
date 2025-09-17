@@ -46,10 +46,10 @@ const ProductSuggestionMain = ({ products }: IProductSuggestionMain) => {
                     {i?.attributes?.name} {`(${i?.attributes?.for})`}
                   </h6>
                   <span className="text-[12px] md:text-[14px] ">Starts from</span>
-                  <h4>
+                  <h1>
                     {CONSTANTS.CURRENCY}
                     {formatPrice(i?.attributes?.price_per_day)}
-                  </h4>
+                  </h1>
                 </div>
                 <CartLink
                   onClick={() => {

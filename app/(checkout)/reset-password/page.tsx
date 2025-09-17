@@ -7,7 +7,7 @@ import React from 'react';
 const ResetPassword = () => {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-8', `w-full h-screen p-8`)}>
-      <h4 className="text-[24px]">Reset Password</h4>
+      <h1 className="text-[24px]">Reset Password</h1>
       <ResetPasswordMain />
       <Link href={`/${CONSTANTS.ROUTES['']}`}>
         <span className="text-orange-1 hover:underline cursor-pointer">Go back home</span>

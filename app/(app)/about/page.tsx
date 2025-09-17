@@ -21,7 +21,7 @@ const About = () => {
         className="py-12 mb-12 px-container-base lg:px-nav-container-lg rounded-custom bg-orange-1/[0.05]"
       >
         <div className="w-full flex flex-col gap-4">
-          <h4 className="text-start text-[32px] font-[700] mb-4">About Us</h4>
+          <h1 className="text-start text-[32px] font-[700] mb-4">About Us</h1>
           <div className="w-full flex flex-col gap-2 font-sans">
             <p>
               Welcome to Grand Occasion Rental! Established in July 2023, we’re a family-run event

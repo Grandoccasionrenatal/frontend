@@ -22,9 +22,9 @@ const AccountConfirmation = () => {
         />
       </svg>
 
-      <h4 className="text-[18px] md:text-[24px] font-giliran font-bold text-center">
+      <h1 className="text-[18px] md:text-[24px] font-giliran font-bold text-center">
         Your Account has been verfied
-      </h4>
+      </h1>
       <Link href={`/${CONSTANTS.ROUTES['']}`}>
         <span className="text-orange-1 text-[24px] hover:underline cursor-pointer">
           Go back home

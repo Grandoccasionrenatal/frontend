@@ -97,11 +97,7 @@ const Nav = () => {
           <div className="flex items-center gap-20 lg:gap-x-48 ">
 
             <HeroTitle/>
-            {/* <Link href={`/`}>
-              <h3 className="text-[22px] sm:text-[32px] leading-[40px] font-giliran font-[700] ">
-                Grand Occasion <span className="text-[16px] font-sans text-start"> ™ </span>
-              </h3>
-            </Link> */}
+
             <ul className="items-center gap-12 hidden xm:flex">
               {navItems?.map((i, idx) => (
                 <li key={idx} className={`font-[600] `}>

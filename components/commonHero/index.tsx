@@ -38,9 +38,9 @@ const CommonHero = ({ className, tag, description, linkedSection, title, image }
         />
       </div>
       <div className="relative px-2  w-full h-full flex flex-col mt-[7rem] items-center gap-4">
-        <h2 className="text-[32px] md:text-[40px] text-center font-[700] leading-[26px]">
+        <h1 className="text-[32px] md:text-[40px] text-center font-[700] leading-[26px]">
           {title}
-        </h2>
+        </h1>
         <p className="text-[14px] md:text-[16px] text-center max-w-[40rem] font-[600]">
           {description}
         </p>
