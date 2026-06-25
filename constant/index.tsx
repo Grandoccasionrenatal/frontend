@@ -5,6 +5,7 @@ const routeEnums = z.enum([
   'about',
   'products',
   'faq',
+  'blog',
   'order',
   'payment',
   'reset-password',
