@@ -45,7 +45,7 @@ const footerLinks: Record<
   Customer: [
     { title: `Products`, link: `/products` },
     { title: `Faq`, link: `/faq` },
-    { title: `Blog`, link: `/` }
+    { title: `Blog`, link: `/blog` }
   ],
   Newsletter: []
 };
