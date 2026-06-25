@@ -320,7 +320,10 @@ const page = async () => {
                 className="relative w-full h-[25rem] bg-slate-300 rounded-custom overflow-hidden"
               >
                 <div className="relative w-full h-full overflow-hidden">
-                  <StrapiImage src={i?.attributes?.image?.data?.attributes?.url} />
+                  <StrapiImage
+                    src={i?.attributes?.image?.data?.attributes?.url}
+                    alt={i?.attributes?.name ? `${i.attributes.name} hire in Kildare, Dublin and Carlow` : ''}
+                  />
                 </div>
                 <div className="absolute bottom-0 px-4 py-2 left-0 bg-gradient-to-b from-transparent to-black-1 w-full pr-[8rem]">
                   <h5 className="text-[24px] text-white font-giliran md:max-w-[70%] md:text-[28px] font-[700]">

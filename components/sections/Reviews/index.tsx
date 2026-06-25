@@ -2,12 +2,31 @@
 
 import otherServices from '@/adapters/others';
 import { cn } from '@/lib/utils';
-import { advertisementInterface, apiInterface, reviewInterface } from '@/types/api.types';
-import { shimmer, toBase64 } from '@/utils/shimmer';
+import { reviewInterface } from '@/types/api.types';
 import { useKeenSlider } from 'keen-slider/react';
-import Image from 'next/image';
-import qs from 'qs';
 import { useEffect, useState } from 'react';
+
+const FALLBACK_REVIEWS: reviewInterface[] = [
+  {
+    id: 1,
+    attributes: {
+      name: 'Zina Jauda',
+      review:
+        'We hired a tent, tables, and chairs from them for our event, and the service was excellent from start to finish. Everything arrived on time, the setup was smooth, and the pickup was just as easy and punctual. The products were in very good condition, and the customer service was outstanding throughout the whole process. Highly recommended — we will definitely use them again!',
+      publishedAt: '',
+      updatedAt: ''
+    }
+  },
+  {
+    id: 2,
+    attributes: {
+      name: 'Lauren Smith',
+      review: 'Would recommend using this service.',
+      publishedAt: '',
+      updatedAt: ''
+    }
+  }
+];
 
 const Reviews = () => {
   const [currentSlide, setCurrentSlide] = useState<any>(0);
@@ -30,15 +49,14 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Now we call the endpoint just once
         const res = await otherServices.getReviews();
-        console.log(res.data);
-        setReviews(res.data);
+        const data = res?.data;
+        setReviews(data?.length ? data : FALLBACK_REVIEWS);
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        setReviews(FALLBACK_REVIEWS);
       }
     };
-  
+
     fetchReviews();
   }, []);
   

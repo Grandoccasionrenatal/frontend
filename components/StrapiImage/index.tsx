@@ -9,12 +9,13 @@ import ReactPlayer from 'react-player/lazy';
 
 interface IStrapiImage {
   src: string;
+  alt?: string;
   className?: string;
   blurDataUrl?: string;
   objectFit?: string;
 }
 
-const StrapiImage = ({ src, className, blurDataUrl, objectFit }: IStrapiImage) => {
+const StrapiImage = ({ src, alt, className, blurDataUrl, objectFit }: IStrapiImage) => {
   const imageLoader = ({ src }: { src: string }) => {
     return `${src}`;
   };
@@ -34,7 +35,7 @@ const StrapiImage = ({ src, className, blurDataUrl, objectFit }: IStrapiImage) =
   ) : (
     <Image
       loader={imageLoader}
-      alt=""
+      alt={alt ?? ''}
       fill={true}
       src={src}
       placeholder={`blur`}
