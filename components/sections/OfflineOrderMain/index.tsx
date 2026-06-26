@@ -87,18 +87,16 @@ const OfflineOrderMain = () => {
         const { city, country, line1, state } = extractAddressComponents(
           results[0] as unknown as AddressObject
         );
-        setUserAddress({
-          country,
-          city,
-          state,
-          line1
-        });
+        setUserAddress({ country, city, state, line1 });
         return getLatLng(results[0]);
       })
       .then(({ lat, lng }) => {
         const res = getUserDistanceOffsetInKm([lat.toString(), lng.toString()]);
         setValue('user_location', res);
         trigger();
+      })
+      .catch(() => {
+        toast.error('Could not look up this address. Please try selecting it again.');
       });
   };
 

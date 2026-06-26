@@ -34,6 +34,7 @@ import moment from 'moment';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import useAuthStore from '@/store/useAuthStore';
 import { transactionInterface } from '@/types/api.types';
+import { toast } from 'react-hot-toast';
 import {
   Dialog,
   DialogContent,
@@ -131,6 +132,11 @@ const CheckoutMain = () => {
     setRedirectLoading(true);
     try {
       const stripe = await stripePromise;
+      if (!stripe) {
+        toast.error('Payment system unavailable. Please refresh and try again.');
+        return;
+      }
+
       const transactionData: transactionInterface = {
         customer_name: getValues('customer_name'),
         return_date: moment(getValues('return_date')).format('YYYY-MM-DD')?.split('T')[0],
@@ -145,7 +151,7 @@ const CheckoutMain = () => {
               : price + (Number(process.env.NEXT_PUBLIC_VAT_PERCENTAGE!) / 100) * price;
             const discount = i.product.attributes.discount || 0;
             const discountedPrice = withVATPrice - (withVATPrice * discount) / 100;
-            const total_price = discountedPrice * rentalDays; //total price per unit
+            const total_price = discountedPrice * rentalDays;
             return {
               product: i?.product,
               units: i?.quantity,
@@ -154,23 +160,35 @@ const CheckoutMain = () => {
           })
         ],
         distance: parseInt(`${watch('user_location')}`),
-        address: {
+        address: userAddress ?? {
           country: ``,
           city: ``,
           state: ``,
           line1: ``
         }
       };
+
       const res = await transactionService.createTransaction(
         loggedIn
           ? { ...transactionData, customer_email: authDetails?.user?.email }
           : { ...transactionData }
       );
-      await stripe?.redirectToCheckout({
-        sessionId: res?.stripeSession.id
+
+      if (!res?.stripeSession?.id) {
+        toast.error('Could not initiate payment. Please try again or contact us.');
+        return;
+      }
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: res.stripeSession.id
       });
+
+      if (error) {
+        toast.error(error.message ?? 'Payment redirect failed. Please try again.');
+      }
     } catch (err) {
-      console.log('err', err);
+      console.error('Checkout error:', err);
+      toast.error('Something went wrong. Please try again or contact us at info@grandoccasionrental.ie');
     } finally {
       setRedirectLoading(false);
     }
@@ -182,18 +200,16 @@ const CheckoutMain = () => {
         const { city, country, line1, state } = extractAddressComponents(
           results[0] as unknown as AddressObject
         );
-        setUserAddress({
-          country,
-          city,
-          state,
-          line1
-        });
+        setUserAddress({ country, city, state, line1 });
         return getLatLng(results[0]);
       })
       .then(({ lat, lng }) => {
         const res = getUserDistanceOffsetInKm([lat.toString(), lng.toString()]);
         setValue('user_location', res);
         trigger();
+      })
+      .catch(() => {
+        toast.error('Could not look up this address. Please try selecting it again.');
       });
   };
 
