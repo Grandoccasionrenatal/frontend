@@ -100,7 +100,7 @@ const Discover = ({ intitialData, tabs }: IDiscover) => {
         nextPageLoading={isFetchingNextPage || isFetching}
         onNextPage={() => (hasNextPage ? fetchNextPage() : null)}
         loader={
-          <div className="!min-w-[16rem] h-[20rem] mt-4 animate-pulse bg-slate-300 rounded-[13px]" />
+          <div className="!min-w-[10rem] sm:!min-w-[16rem] h-[20rem] mt-4 animate-pulse bg-slate-300 rounded-[13px]" />
         }
       >
         {products?.pages?.map((page) => (
@@ -110,7 +110,7 @@ const Discover = ({ intitialData, tabs }: IDiscover) => {
                 key={idx}
                 className={`w-max pt-4 ${i?.attributes?.is_available ? `` : `hidden`}`}
               >
-                <div className=" relative !min-w-[16rem]   group cursor-pointer w-full flex flex-col gap-[.5rem] items-center">
+                <div className="relative !min-w-[10rem] sm:!min-w-[16rem] group cursor-pointer w-full flex flex-col gap-[.5rem] items-center">
                   <div
                     className={`absolute top-0 -mt-[10px] -rotate-[20deg] min-w-[3rem] h-[1.5rem] bg-orange-1 ${
                       i?.attributes?.discount ? `flex` : `hidden`

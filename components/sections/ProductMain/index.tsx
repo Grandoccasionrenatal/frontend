@@ -455,7 +455,7 @@ const ProductMain = ({ categories, initialData }: IProductMain) => {
             Categories
           </h5>
           <div className="w-full h-max max-w-full overflow-auto py-1 no-scrollbar">
-            <div className="flex py-1 lg:py-0 gap-2 items-center whitespace-nowrap lg:whitespace-normal lg:flex-wrap">
+            <div className="flex py-1 lg:py-0 gap-2 items-center flex-wrap">
               {/* Pill for "All Items" */}
               <Link href={`${CONSTANTS.ROUTES.products}?type=${currType}`}>
                 <div
@@ -543,7 +543,7 @@ const ProductMain = ({ categories, initialData }: IProductMain) => {
                             <div
                               className="absolute flex flex-col gap-1 bottom-0 px-4 py-2 pt-8 left-0
                                 bg-gradient-to-b from-transparent to-black-1 text-white w-full
-                                pr-[6rem] lg:pr-[8rem]
+                                pr-[5rem] lg:pr-[8rem]
                               "
                             >
                               <h6 className="text-[16px] lg:text-[18px] font-giliran font-[700]">

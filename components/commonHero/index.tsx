@@ -38,24 +38,24 @@ const CommonHero = ({ className, tag, description, linkedSection, title, image }
         />
       </div>
       <div className="relative px-2  w-full h-full flex flex-col mt-[7rem] items-center gap-4">
-        <h2 className="text-[32px] md:text-[40px] text-center font-[700] leading-[26px]">
+        <h2 className="text-[26px] md:text-[40px] text-center font-[700] leading-[34px] md:leading-[48px]">
           {title}
         </h2>
         <p className="text-[14px] md:text-[16px] text-center max-w-[40rem] font-[600]">
           {description}
         </p>
       </div>
-      <div className="absolute bottom-0 right-0 h-[4rem] w-[15rem] md:w-[20rem] rounded-tl-custom bg-white pl-4 pt-4 pr-2 pb-2">
+      <div className="absolute bottom-0 right-0 h-[4rem] w-[11rem] sm:w-[15rem] md:w-[20rem] rounded-tl-custom bg-white pl-4 pt-4 pr-2 pb-2">
         <div className="w-full h-full grid place-items-center  border border-black-1 rounded-custom-small">
           <span className="text-[12px] md:text-[14px]">{tag}</span>
         </div>
       </div>
       <CurveCut
-        containerClassName="w-[15rem] md:w-[20rem] h-[1rem] bottom-[4rem] right-0"
+        containerClassName="w-[11rem] sm:w-[15rem] md:w-[20rem] h-[1rem] bottom-[4rem] right-0"
         childClassName="bottom-0 right-0 before:shadow-[0_16px_0_0_white]"
       />
       <CurveCut
-        containerClassName="w-[15rem] md:w-[20rem] h-[2rem] right-[15rem] md:right-[20rem] bottom-0"
+        containerClassName="w-[11rem] sm:w-[15rem] md:w-[20rem] h-[2rem] right-[11rem] sm:right-[15rem] md:right-[20rem] bottom-0"
         childClassName="bottom-0 right-0  "
       />
       <div

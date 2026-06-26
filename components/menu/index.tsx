@@ -38,8 +38,8 @@ const Menu = () => {
       </svg>
       {createPortal(
         <div
-          className={`fixed flex flex-col gap-8 h-[100vh] px-4 py-8 w-[100vw]
-           top-0 bottom-0 right-0 left-0 bg-white z-[20] transition-transform duration-300 ease-in-out delay-100
+          className={`fixed flex flex-col gap-8 h-screen px-4 py-8 w-full
+           top-0 bottom-0 right-0 left-0 bg-white z-[20] transition-transform duration-300 ease-in-out delay-100 overflow-y-auto
            ${!menuOpen ? `-translate-x-full` : `translate-x-0`}
            `}
         >
@@ -70,7 +70,7 @@ const Menu = () => {
               <li
                 onClick={() => setMenuOpen(false)}
                 key={idx}
-                className={`font-[500]  text-[40px] relative group w-max overflow-y-hidden overflow-x-hidden`}
+                className={`font-[500] text-[28px] sm:text-[40px] relative group w-max overflow-y-hidden overflow-x-hidden`}
               >
                 <Link href={`/${i?.link}`} key={idx}>
                   {i?.title}
@@ -90,7 +90,7 @@ const Menu = () => {
                     setLoginOpen(true);
                   }}
                   key={10000}
-                  className={`font-[500] mt-12 border border-slate-200 px-4  text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
+                  className={`font-[500] mt-12 border border-slate-200 px-4  text-[22px] sm:text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
                 >
                   Login
                   <span
@@ -103,7 +103,7 @@ const Menu = () => {
                     setSignUpOpen(true);
                   }}
                   key={100002}
-                  className={`font-[500] border border-slate-200 px-4  text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
+                  className={`font-[500] border border-slate-200 px-4  text-[22px] sm:text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
                 >
                   Sign Up
                   <span
@@ -118,7 +118,7 @@ const Menu = () => {
                   setLogoutOpen(true);
                 }}
                 key={100002}
-                className={`font-[500] border border-slate-200 px-4  text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
+                className={`font-[500] border border-slate-200 px-4  text-[22px] sm:text-[30px] relative group w-max overflow-y-hidden overflow-x-hidden`}
               >
                 Logout
                 <span

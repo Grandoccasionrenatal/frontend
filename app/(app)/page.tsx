@@ -202,7 +202,7 @@ const page = async () => {
       {/* </section> */}
       <section className="relative w-full flex flex-col gap-16 md:gap-8">
         <div className="grid w-full h-max max-w-full overflow-auto py-1 no-scrollbar">
-          <div className="flex py-1 lg:py-0 gap-2 items-center justify-center whitespace-nowrap lg:whitespace-normal lg:flex-wrap">
+          <div className="flex py-1 lg:py-0 gap-2 items-center justify-start sm:justify-center flex-wrap">
             {banners?.data?.map((i, idx) => (
               <Link
                 className=" border rounded-custom-small px-4 md:px-8 py-1 font-giliran font-[600] hover:bg-orange-1 text-black-1/80 hover:text-white cursor-pointer transition-colors ease-in-out duration-100"
@@ -239,10 +239,10 @@ const page = async () => {
         className={`relative h-[70vh] w-full container px-container-base lg:px-container-lg overflow-hidden border`}
       >
         <div className="absolute top-[20%] text-white md:top-[10%] w-full h-full flex flex-col z-[1]">
-          <h3 className=" text-[32px] leading-[42px] w-full md:text-[60px] font-[900] max-w-[330px] md:max-w-[45rem] md:leading-[64px] mb-8">
+          <h3 className="text-[28px] leading-[36px] w-full md:text-[60px] font-[900] max-w-[330px] md:max-w-[45rem] md:leading-[64px] mb-8">
             One-Stop Party Rentals
           </h3>
-          <p className="text-[25px] leading-[22px] font-[700] mb-12 max-w-[500px]">
+          <p className="text-[18px] sm:text-[25px] leading-[28px] sm:leading-[30px] font-[700] mb-12 max-w-[500px]">
          
             Marquee, Chairs, Tables, Props and More. Hassle-Free & Delivered to You.
           </p>

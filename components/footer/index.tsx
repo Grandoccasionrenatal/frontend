@@ -155,7 +155,7 @@ const Footer = () => {
                 Sign up to receive updates, <br />
                 offers and other exclusive info via email
               </span>
-              <div className="max-w-[15rem] p-1 flex gap-2 my-4 h-[2.75rem] rounded-[30px] border border-white">
+              <div className="w-full sm:max-w-[15rem] p-1 flex gap-2 my-4 h-[2.75rem] rounded-[30px] border border-white">
                 <div className="flex flex-grow overflow-hidden pl-2 !border-none focus-visible:border-none outline-none focus:ring-0 focus:border-none">
                   <Input className="w-full bg-transparent border-0 ring-0 focus:ring-0 focus-visible:ring-0 focus:border-0 text-white placeholder:text-white" />
                 </div>

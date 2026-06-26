@@ -94,7 +94,7 @@ const Nav = () => {
         ${navWithBg ? `bg-white/20 backdrop-blur rounded-custom` : `bg-transparent`}
         transition-all duration-500 ease-in-out `}
         >
-          <div className="flex items-center gap-20 lg:gap-x-48 ">
+          <div className="flex items-center gap-4 lg:gap-x-48 ">
 
             <HeroTitle/>
             {/* <Link href={`/`}>
@@ -124,7 +124,7 @@ const Nav = () => {
                             </Link>
                           </NavigationMenuTrigger>
                           <NavigationMenuContent>
-                            <div className="w-max min-w-[22rem] flex flex-col p-4 gap-4">
+                            <div className="w-max min-w-[16rem] sm:min-w-[22rem] flex flex-col p-4 gap-4">
                               <div className="flex flex-row  items-center gap-2 ">
                                 <span>Rentals (Hire)</span>
                                 <svg
