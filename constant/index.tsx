@@ -15,7 +15,8 @@ const routeEnums = z.enum([
   'delivery-policy',
   'returns-policy',
   'terms-of-service',
-  'cancellation-policy'
+  'cancellation-policy',
+  'contact'
 ]);
 
 export type routeTypes = z.infer<typeof routeEnums>;
