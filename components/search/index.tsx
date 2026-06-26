@@ -10,12 +10,20 @@ import {
 import { Input } from '../ui/input';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import CONSTANTS from '@/constant';
 import { sluggify } from '@/utils';
 
 const Search = () => {
   const [searchInput, setSearchInput] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const router = useRouter();
+
+  const handleSearch = () => {
+    if (!searchInput.trim()) return;
+    setDialogOpen(false);
+    router.push(`/${CONSTANTS.ROUTES.products}?search=${sluggify(searchInput)}`);
+  };
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -50,13 +58,12 @@ const Search = () => {
               <Input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e?.target?.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                 placeholder="Search For Products..."
+                autoFocus
                 className="bg-transparent border-0 shadow-none focus:border-none font-sans focus-visible:ring-0 focus-visible:border-none focus:ring-0 placeholder:text-black-1/50 placeholder:font-[400]"
               />
-              <Link
-                onClick={() => setDialogOpen(false)}
-                href={`/${CONSTANTS.ROUTES.products}?search=${sluggify(searchInput)}`}
-              >
+              <button type="button" onClick={handleSearch} aria-label="Search">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -71,7 +78,7 @@ const Search = () => {
                     d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
                   />
                 </svg>
-              </Link>
+              </button>
             </div>
           </div>
         </DialogHeader>
