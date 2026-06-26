@@ -4,9 +4,9 @@ import qs from 'qs';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Blog — Event Planning Tips & Ideas | Grand Occasion Rentals',
+  title: 'Blog — Event Planning Tips & Ideas | Grand Occasion Rental Limited',
   description:
-    'Discover event planning tips, product spotlights, real event showcases and seasonal ideas from Grand Occasion Rentals — serving Kildare, Dublin, Carlow and Portlaoise.'
+    'Discover event planning tips, product spotlights, real event showcases and seasonal ideas from Grand Occasion Rental Limited — serving Kildare, Dublin, Carlow and Portlaoise.'
 };
 
 export const revalidate = 60;
@@ -82,7 +82,7 @@ export default async function BlogPage() {
                     </h2>
                     <p className="text-sm text-gray-500 flex-1 line-clamp-3">{excerpt}</p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-gray-400">{author ?? 'Grand Occasion Rentals'}</span>
+                      <span className="text-xs text-gray-400">{author ?? 'Grand Occasion Rental Limited'}</span>
                       <span className="text-sm font-semibold text-orange-500 group-hover:underline">
                         Read more →
                       </span>

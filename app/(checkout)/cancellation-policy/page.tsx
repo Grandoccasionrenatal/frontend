@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cancellation Policy | Grand Occasion Rentals',
+  title: 'Cancellation Policy | Grand Occasion Rental Limited',
   description:
-    'Read our full cancellation and rescheduling policy, including bad weather, force majeure, and unforeseen circumstances — Grand Occasion Rentals, Kildare.'
+    'Read our full cancellation and rescheduling policy, including bad weather, force majeure, and unforeseen circumstances — Grand Occasion Rental Limited, Kildare.'
 };
 
 const CancellationPolicyPage = () => {

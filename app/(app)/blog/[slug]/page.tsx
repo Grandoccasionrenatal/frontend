@@ -28,7 +28,7 @@ export async function generateMetadata({
   const post = data?.data?.[0];
   if (!post) return {};
   return {
-    title: `${post.attributes.title} | Grand Occasion Rentals Blog`,
+    title: `${post.attributes.title} | Grand Occasion Rental Limited Blog`,
     description: post.attributes.excerpt
   };
 }
@@ -61,7 +61,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           </div>
           <h1 className="text-4xl font-bold leading-tight mb-4">{title}</h1>
           <p className="text-lg text-gray-500 mb-4">{excerpt}</p>
-          <p className="text-sm text-gray-400">By {author ?? 'Grand Occasion Rentals'}</p>
+          <p className="text-sm text-gray-400">By {author ?? 'Grand Occasion Rental Limited'}</p>
         </div>
 
         {/* Cover image */}
