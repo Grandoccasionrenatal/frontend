@@ -11,13 +11,14 @@ Topic research based on competitor blogs:
   - entertainmentsolutions.ie
   - iihf.ie (Irish Inflatable Hirers Federation)
 """
-import os, json, re
+import os, json, re, io
 from datetime import datetime, timezone
 import requests
 
 STRAPI_URL = os.environ["STRAPI_URL"]
 STRAPI_TOKEN = os.environ["STRAPI_TOKEN"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
+PEXELS_API_KEY = os.environ["PEXELS_API_KEY"]
 
 # -- Location pool (within ~90 min of Co. Kildare) --------------------------
 LOCATIONS = [
@@ -167,6 +168,97 @@ def claude(prompt):
     return r.json()["content"][0]["text"]
 
 
+# -- Keyword map for Pexels image search -----------------------------------
+# Maps category + keywords to the best Pexels search query
+PEXELS_QUERIES = {
+    "marquee":        "outdoor marquee tent event",
+    "wedding":        "outdoor wedding reception marquee",
+    "birthday":       "birthday party outdoor celebration",
+    "communion":      "holy communion family celebration",
+    "confirmation":   "confirmation celebration family",
+    "bouncy castle":  "children bouncy castle party",
+    "soft play":      "children soft play indoor",
+    "flower wall":    "flower wall backdrop event",
+    "table":          "elegant event table setting",
+    "chair":          "chiavari chairs wedding banquet",
+    "linen":          "white tablecloth event table",
+    "glassware":      "event glassware champagne flutes",
+    "corporate":      "corporate outdoor event tent",
+    "garden party":   "garden party outdoor celebration",
+    "safety":         "outdoor event safety children",
+    "flooring":       "outdoor event flooring marquee",
+    "lighting":       "marquee fairy lights event",
+    "default":        "outdoor event hire marquee Ireland",
+}
+
+
+def pexels_query_for_post(title: str, category: str) -> str:
+    title_lower = title.lower()
+    for keyword, query in PEXELS_QUERIES.items():
+        if keyword in title_lower:
+            return query
+    # Fall back by category
+    cat_map = {
+        "seasonal-local":      "outdoor marquee tent event",
+        "event-planning-tips": "outdoor event planning marquee",
+        "product-spotlight":   "event hire equipment party",
+        "real-event-showcase": "outdoor party celebration garden",
+        "safety-guide":        "outdoor event safety children",
+    }
+    return cat_map.get(category, PEXELS_QUERIES["default"])
+
+
+def fetch_pexels_image(query: str):
+    """Search Pexels and return (image_bytes, filename, photographer_credit)."""
+    r = requests.get(
+        "https://api.pexels.com/v1/search",
+        params={"query": query, "per_page": 5, "orientation": "landscape"},
+        headers={"Authorization": PEXELS_API_KEY},
+        timeout=15,
+    )
+    r.raise_for_status()
+    photos = r.json().get("photos", [])
+    if not photos:
+        # fallback query
+        r2 = requests.get(
+            "https://api.pexels.com/v1/search",
+            params={"query": "outdoor event celebration", "per_page": 3, "orientation": "landscape"},
+            headers={"Authorization": PEXELS_API_KEY},
+            timeout=15,
+        )
+        r2.raise_for_status()
+        photos = r2.json().get("photos", [])
+
+    if not photos:
+        return None, None, None
+
+    photo = photos[0]
+    img_url = photo["src"]["large2x"]  # 1880px wide, good quality
+    photographer = photo.get("photographer", "Pexels")
+    photo_id = photo["id"]
+    filename = f"blog-cover-{photo_id}.jpg"
+
+    img_bytes = requests.get(img_url, timeout=30).content
+    return img_bytes, filename, photographer
+
+
+def upload_image_to_strapi(img_bytes: bytes, filename: str, alt_text: str) -> int:
+    """Upload image bytes to Strapi media library, return media ID."""
+    r = requests.post(
+        f"{STRAPI_URL}/api/upload",
+        headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
+        files={"files": (filename, io.BytesIO(img_bytes), "image/jpeg")},
+        data={"fileInfo": json.dumps({"alternativeText": alt_text, "caption": ""})},
+        timeout=60,
+    )
+    r.raise_for_status()
+    uploaded = r.json()
+    # Strapi returns a list
+    if isinstance(uploaded, list):
+        return uploaded[0]["id"]
+    return uploaded["id"]
+
+
 def slugify(title):
     s = title.lower()
     s = re.sub(r"[^a-z0-9\s-]", "", s)
@@ -298,7 +390,22 @@ OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the J
     post_data["author"] = "Grand Occasion Rentals"
     post_data["publishedAt"] = f"{today}T09:00:00.000Z"
 
-    # -- 3. Publish ---------------------------------------------------------
+    # -- 3. Fetch and upload cover image ------------------------------------
+    title = post_data.get("title", "")
+    category = post_data.get("category", "")
+    query = pexels_query_for_post(title, category)
+    print(f"Searching Pexels: {query}")
+
+    img_bytes, filename, photographer = fetch_pexels_image(query)
+    if img_bytes:
+        alt_text = f"{title} - Grand Occasion Rental"
+        media_id = upload_image_to_strapi(img_bytes, filename, alt_text)
+        post_data["cover_image"] = media_id
+        print(f"Uploaded cover image #{media_id} (photo by {photographer} via Pexels)")
+    else:
+        print("Warning: no Pexels image found, posting without cover image")
+
+    # -- 4. Publish ---------------------------------------------------------
     result = strapi_post(post_data)
     new_id = result["data"]["id"]
     new_title = result["data"]["attributes"]["title"]
