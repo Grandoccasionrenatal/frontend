@@ -58,12 +58,13 @@ const page = async () => {
         filters: {
           product_categories: {
             name: {
-              $contains: 'outdoor furniture for sale'
+              $containsi: 'Marquee Packages'
             }
-          }
+          },
+          is_available: { $eq: true }
         },
         pagination: {
-          page: page,
+          page: 1,
           pageSize: 4,
           withCount: true
         }
@@ -360,9 +361,9 @@ const page = async () => {
       <section className="relative w-full py-12  rounded-custom ">
         <div className="w-full flex flex-col ">
           <h4 className="text-center text-[32px] font-[700] mb-4">
-            Discover Outdoor Furniture for Sale
+            Featured Packages
           </h4>
-          <Discover tabs={['outdoor furniture for sale']} intitialData={initDiscover} />
+          <Discover tabs={['Marquee Packages']} intitialData={initDiscover} />
         </div>
       </section>
 

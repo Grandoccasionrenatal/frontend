@@ -182,63 +182,6 @@ const Nav = () => {
                                         </li>
                                       ))}
                               </ul>
-                              <div className="flex flex-row   items-center gap-2 ">
-                                <span>Sale</span>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="w-6 h-6 text-black-1/80"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                                  />
-                                </svg>
-                              </div>
-                              <ul className="w-full grid grid-cols-2 gap-1 bg-white ">
-                                {isLoading
-                                  ? [...Array(6)]?.map((_, idx) => (
-                                      <li key={idx} className="h-[4rem]">
-                                        <Skeleton className="w-full h-full" />
-                                      </li>
-                                    ))
-                                  : data?.data
-                                      ?.filter((i) => i?.attributes?.type === 'sale')
-                                      ?.map((i, idx) => (
-                                        <li key={idx} className="h-[4rem] group">
-                                          <NavigationMenuLink asChild className="w-full h-full">
-                                            <Link
-                                              href={`/products?category=${sluggify(
-                                                i?.attributes?.name
-                                              )}`}
-                                              className="flex flex-row justify-center items-center gap-2 bg-orange-1/[0.05] group-hover:bg-orange-1/10 rounded-sm py-2 px-4 transition-colors ease-in-out duration-300"
-                                            >
-                                              <span className="text-[14px] w-max whitespace-nowrap">
-                                                {capitalizeText(i?.attributes?.name, 'allWords')}
-                                              </span>
-                                              <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={1.5}
-                                                stroke="currentColor"
-                                                className="h-4 w-4"
-                                              >
-                                                <path
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
-                                                  d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                                                />
-                                              </svg>
-                                            </Link>
-                                          </NavigationMenuLink>
-                                        </li>
-                                      ))}
-                              </ul>
                             </div>
                           </NavigationMenuContent>
                         </NavigationMenuItem>

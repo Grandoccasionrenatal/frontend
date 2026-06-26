@@ -15,18 +15,13 @@ import Link from 'next/link';
 import useCartStore from '@/store/useCartStore';
 import { formatPrice } from '@/utils';
 
-type pillTabTypes =
-  | 'outdoor furniture for sale'
-  | 'event accessories for sale'
-  | 'soft playground equipment';
-
 interface IDiscover {
   intitialData?: apiInterface<productInterface[]>;
-  tabs: pillTabTypes[];
+  tabs: string[];
 }
 
 const Discover = ({ intitialData, tabs }: IDiscover) => {
-  const [currTab, setCurrTab] = useState<pillTabTypes>(tabs[0]);
+  const [currTab, setCurrTab] = useState<string>(tabs[0]);
   const { addToCart, setOpen } = useCartStore((store) => store);
 
   const getProducts = async ({ pageParam = 1 }) => {
