@@ -2,10 +2,18 @@
 """
 Daily blog post generator for grandoccasionrental.ie
 Calls Claude API to write SEO-optimised content then publishes to Strapi.
+
+Topic research based on competitor blogs:
+  - marqueehire.ie (All in One Event Hire)
+  - irishmarqueehireltd.com (S&G Party Hire)
+  - caterhire.ie
+  - rentatentni.com
+  - entertainmentsolutions.ie
+  - iihf.ie (Irish Inflatable Hirers Federation)
 """
-import os, json, sys, re
+import os, json, re
 from datetime import datetime, timezone
-import urllib.request, urllib.error
+import urllib.request
 
 STRAPI_URL = os.environ["STRAPI_URL"]
 STRAPI_TOKEN = os.environ["STRAPI_TOKEN"]
@@ -16,41 +24,108 @@ LOCATIONS = [
     # Kildare
     "Naas, Co. Kildare", "Newbridge, Co. Kildare", "Athy, Co. Kildare",
     "Kildare town", "Maynooth, Co. Kildare", "Celbridge, Co. Kildare",
-    "Kilcock, Co. Kildare", "Clane, Co. Kildare", "Monasterevin, Co. Kildare",
-    "Kilcullen, Co. Kildare", "Castledermot, Co. Kildare", "Sallins, Co. Kildare",
+    "Leixlip, Co. Kildare", "Kilcock, Co. Kildare", "Clane, Co. Kildare",
+    "Monasterevin, Co. Kildare", "Kilcullen, Co. Kildare", "Castledermot, Co. Kildare",
+    "Sallins, Co. Kildare", "Prosperous, Co. Kildare", "Rathangan, Co. Kildare",
     # Dublin
-    "Dublin city", "Tallaght, Dublin", "Lucan, Dublin", "Clondalkin, Dublin",
-    "Blanchardstown, Dublin", "Swords, Dublin", "Rathfarnham, Dublin",
-    "Dundrum, Dublin", "Terenure, Dublin", "Dún Laoghaire, Dublin",
+    "Dublin city centre", "Tallaght, Dublin", "Lucan, Dublin", "Clondalkin, Dublin",
+    "Blanchardstown, Dublin", "Swords, Co. Dublin", "Rathfarnham, Dublin",
+    "Dundrum, Dublin", "Terenure, Dublin", "Dún Laoghaire, Co. Dublin",
+    "Malahide, Co. Dublin", "Balbriggan, Co. Dublin", "Clonskeagh, Dublin",
+    "Ballsbridge, Dublin", "Stillorgan, Co. Dublin",
     # Carlow
     "Carlow town", "Tullow, Co. Carlow", "Muinebheag, Co. Carlow",
-    "Graiguecullen, Co. Carlow",
+    "Graiguecullen, Co. Carlow", "Bagenalstown, Co. Carlow",
     # Laois
     "Portlaoise, Co. Laois", "Abbeyleix, Co. Laois", "Mountrath, Co. Laois",
     "Portarlington, Co. Laois", "Mountmellick, Co. Laois", "Rathdowney, Co. Laois",
-    "Durrow, Co. Laois",
+    "Durrow, Co. Laois", "Stradbally, Co. Laois",
     # Wicklow
     "Blessington, Co. Wicklow", "Arklow, Co. Wicklow", "Greystones, Co. Wicklow",
-    "Baltinglass, Co. Wicklow", "Wicklow town",
+    "Baltinglass, Co. Wicklow", "Wicklow town", "Bray, Co. Wicklow",
+    "Rathdrum, Co. Wicklow",
     # Kilkenny
     "Kilkenny city", "Castlecomer, Co. Kilkenny", "Thomastown, Co. Kilkenny",
-    "Callan, Co. Kilkenny", "Graiguenamanagh, Co. Kilkenny",
+    "Callan, Co. Kilkenny", "Graiguenamanagh, Co. Kilkenny", "Piltown, Co. Kilkenny",
     # Tipperary
     "Thurles, Co. Tipperary", "Templemore, Co. Tipperary", "Roscrea, Co. Tipperary",
-    "Clonmel, Co. Tipperary", "Nenagh, Co. Tipperary",
+    "Clonmel, Co. Tipperary", "Nenagh, Co. Tipperary", "Cashel, Co. Tipperary",
+    "Tipperary town",
     # Waterford
-    "Waterford city", "Carrick-on-Suir, Co. Tipperary",
-    # Offaly / Meath
-    "Tullamore, Co. Offaly", "Edenderry, Co. Offaly",
-    "Trim, Co. Meath", "Navan, Co. Meath",
+    "Waterford city", "Dungarvan, Co. Waterford", "Carrick-on-Suir, Co. Tipperary",
+    "Tramore, Co. Waterford",
+    # Offaly / Meath / Westmeath
+    "Tullamore, Co. Offaly", "Edenderry, Co. Offaly", "Birr, Co. Offaly",
+    "Trim, Co. Meath", "Navan, Co. Meath", "Dunshaughlin, Co. Meath",
+    "Mullingar, Co. Westmeath",
+    # Wexford
+    "Wexford town", "Enniscorthy, Co. Wexford", "Gorey, Co. Wexford",
 ]
 
-CATEGORIES = [
-    "seasonal-local",
-    "event-planning-tips",
-    "product-spotlight",
-    "real-event-showcase",
+# ── Topic pool (researched from competitor blogs) ──────────────────────────
+# Format: (category, topic_idea)
+# Categories: seasonal-local | event-planning-tips | product-spotlight |
+#             real-event-showcase | safety-guide
+TOPIC_IDEAS = [
+    # ── From marqueehire.ie ──
+    ("product-spotlight",    "Table size guide: which table fits how many guests and what tablecloth size you need"),
+    ("product-spotlight",    "Chiavari chairs vs folding chairs: which is right for your event?"),
+    ("event-planning-tips",  "How to choose the right marquee size for your guest count"),
+    ("event-planning-tips",  "10 tips for planning a successful outdoor event with a marquee"),
+    ("product-spotlight",    "Why eco-friendly event hire is growing in Ireland"),
+    # ── From caterhire.ie ──
+    ("event-planning-tips",  "Frame marquee vs traditional pole marquee: which is best for an Irish garden?"),
+    ("event-planning-tips",  "Marquee wedding guide: furniture, lighting, flooring, and climate control"),
+    ("event-planning-tips",  "How to decorate the inside of a marquee: lighting, draping, and centrepieces"),
+    ("event-planning-tips",  "Flooring options for marquees: grass, wooden floor, or carpet?"),
+    # ── From rentatentni.com ──
+    ("event-planning-tips",  "Ground conditions for marquees: what to check before you book"),
+    ("event-planning-tips",  "How to plan power and lighting for an outdoor marquee event"),
+    ("event-planning-tips",  "Marquee setup time: how early should the marquee go up before your event?"),
+    ("event-planning-tips",  "Emergency exits and accessibility in marquee events: what you need to know"),
+    # ── From iihf.ie (bouncy castle safety) ──
+    ("safety-guide",         "Bouncy castle hire safety in Ireland: what to check before you book"),
+    ("safety-guide",         "EN14960 safety standard: what it means when hiring inflatables in Ireland"),
+    ("safety-guide",         "Supervising a bouncy castle at a birthday party: a parent's guide"),
+    # ── From entertainmentsolutions.ie ──
+    ("event-planning-tips",  "Holy Communion party planning guide: marquees, games, and decorations"),
+    ("event-planning-tips",  "Kids birthday party hire ideas: bouncy castles, soft play, and flower walls"),
+    ("product-spotlight",    "Flower wall hire: why it's the most photographed item at Irish parties"),
+    ("product-spotlight",    "Soft play hire for toddlers: what to expect and how to set it up safely"),
+    # ── General Irish event planning ──
+    ("event-planning-tips",  "Garden party checklist: everything you need to hire for an outdoor celebration"),
+    ("event-planning-tips",  "How far in advance should you book a marquee in Ireland?"),
+    ("event-planning-tips",  "Outdoor wedding reception checklist: marquee, furniture, linen, and logistics"),
+    ("event-planning-tips",  "How to plan a 21st birthday party: hire equipment, themes, and tips"),
+    ("event-planning-tips",  "Corporate outdoor events: how to set up a professional marquee function"),
+    ("event-planning-tips",  "What to do if it rains at your outdoor event: marquee tips for Irish weather"),
+    ("product-spotlight",    "Round tables vs rectangular tables: which works best for your event layout?"),
+    ("product-spotlight",    "Table linen hire: how to choose colours and styles for your event"),
+    ("product-spotlight",    "Glassware hire for events: how much do you need and what types to order?"),
+    ("product-spotlight",    "Marquee flooring hire: wooden dance floors, carpets, and outdoor matting"),
+    ("real-event-showcase",  "Real event: a beautiful Confirmation celebration in a Kildare garden"),
+    ("real-event-showcase",  "Real event: a 40th birthday garden party in Co. Dublin"),
+    ("real-event-showcase",  "Real event: a summer wedding reception in a Wicklow estate garden"),
+    ("real-event-showcase",  "Real event: a corporate summer party in Co. Carlow"),
 ]
+
+# Authoritative outbound link sources per county/topic
+OUTBOUND_LINKS = {
+    "kildare":   "https://www.visitkildare.ie/",
+    "dublin":    "https://www.visitdublin.com/",
+    "carlow":    "https://www.carlowtourism.com/",
+    "laois":     "https://www.laoistourism.ie/",
+    "wicklow":   "https://www.visitwicklow.ie/",
+    "kilkenny":  "https://www.visitkilkenny.ie/",
+    "tipperary": "https://www.tipperary.com/",
+    "waterford": "https://www.visitwaterford.com/",
+    "wexford":   "https://www.visitwexford.ie/",
+    "meath":     "https://www.meath.ie/tourism",
+    "offaly":    "https://www.offaly.ie/",
+    "wedding":   "https://www.confetti.ie/",
+    "safety":    "https://iihf.ie/",
+    "general":   "https://www.ireland.ie/en/",
+}
 
 
 def strapi_get(path):
@@ -93,7 +168,7 @@ def claude(prompt):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=90) as r:
         resp = json.loads(r.read())
     return resp["content"][0]["text"]
 
@@ -105,81 +180,117 @@ def slugify(title):
     return s[:80]
 
 
+def pick_outbound_links(location: str, category: str) -> str:
+    links = []
+    loc_lower = location.lower()
+    for county, url in OUTBOUND_LINKS.items():
+        if county in loc_lower:
+            links.append(f'{url} (local tourism / county authority for {county.title()})')
+            break
+    else:
+        links.append(f'{OUTBOUND_LINKS["general"]} (Tourism Ireland)')
+
+    if category in ("event-planning-tips", "real-event-showcase"):
+        links.append(f'{OUTBOUND_LINKS["wedding"]} (Irish wedding planning resource — confetti.ie)')
+    if category == "safety-guide":
+        links.append(f'{OUTBOUND_LINKS["safety"]} (Irish Inflatable Hirers Federation — safety standards body)')
+    links.append("https://www.grandoccasionrental.ie/products (internal — our products page)")
+    return "\n".join(f"  - {l}" for l in links)
+
+
 def main():
-    # ── 1. Fetch recent posts to avoid repetition ──
+    # ── 1. Fetch recent posts ──────────────────────────────────────────────
     recent = strapi_get(
         "/api/blog-posts?sort=createdAt:desc"
-        "&pagination[pageSize]=20"
+        "&pagination[pageSize]=30"
         "&fields[0]=title&fields[1]=slug&fields[2]=category"
     )
     recent_posts = recent.get("data") or []
     recent_titles = [p["attributes"]["title"] for p in recent_posts]
-    recent_categories = [p["attributes"].get("category", "") for p in recent_posts[:4]]
-    used_locations = " | ".join(recent_titles[-14:])  # last 14 post titles
+    recent_categories = [p["attributes"].get("category", "") for p in recent_posts[:5]]
+    recent_titles_block = "\n".join(f"  - {t}" for t in recent_titles)
+
+    # Filter topic ideas not used recently
+    used_titles_lower = " ".join(recent_titles).lower()
+    fresh_topics = [
+        (cat, idea) for cat, idea in TOPIC_IDEAS
+        if not any(kw in used_titles_lower for kw in idea.lower().split()[:3])
+        and cat not in recent_categories[:2]
+    ] or TOPIC_IDEAS  # fallback to full list if everything used
+
+    # Filter locations not used recently
+    fresh_locations = [
+        loc for loc in LOCATIONS
+        if loc.split(",")[0].lower() not in used_titles_lower
+    ] or LOCATIONS
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    # ── 2. Ask Claude to pick topic & write post ──
+    outbound_hint = pick_outbound_links(fresh_locations[0], fresh_topics[0][0])
+
+    # ── 2. Generate post ───────────────────────────────────────────────────
     prompt = f"""You are an expert SEO content writer for Grand Occasion Rental Limited, an event equipment hire company based in Co. Kildare, Ireland.
 
-Today's date: {today}
+Today: {today}
 
-BUSINESS DETAILS:
+BUSINESS:
 - Services: marquee hire, tables, chairs, linen, flower walls, bouncy castles, soft play, Chiavari chairs, glassware
-- Phone/WhatsApp: 085 156 3498
-- Email: info@grandoccasionrental.ie
-- Website: https://www.grandoccasionrental.ie
-- Delivery zones: Co. Kildare from €20 | Carlow/Laois/Wicklow from €40 | Dublin/Kilkenny/Wexford/Tipperary from €60 | Waterford/Offaly/Meath/Westmeath from €80+
-- All marquees include professional setup and takedown by our team
+- Phone/WhatsApp: 085 156 3498 | Email: info@grandoccasionrental.ie | Web: https://www.grandoccasionrental.ie
+- Delivery: Co. Kildare from €20 | Carlow/Laois/Wicklow from €40 | Dublin/Kilkenny/Wexford/Tipperary from €60 | Waterford/Offaly/Meath from €80+
+- All marquees: professional setup and takedown included
 
-RECENT POSTS (do NOT repeat these topics):
-{chr(10).join(f"- {t}" for t in recent_titles)}
+RECENT POSTS — do NOT repeat these topics or locations:
+{recent_titles_block}
 
-RECENT CATEGORIES USED (avoid repeating for variety):
+RECENT CATEGORIES USED — vary from these:
 {recent_categories}
 
-AVAILABLE LOCATIONS POOL:
-{chr(10).join(f"- {loc}" for loc in LOCATIONS)}
-
-CATEGORIES:
-- seasonal-local: target a specific town/area (e.g. "Marquee Hire in Naas")
-- event-planning-tips: practical party planning advice
-- product-spotlight: focus on one hire item
-- real-event-showcase: fictional-but-realistic customer success story in a local area
-
 YOUR TASK:
-1. Choose ONE location from the pool NOT covered in recent posts
-2. Choose ONE category for variety
-3. Write a complete, SEO-optimised blog post (700-950 words)
+Pick ONE combination from the following lists that is NOT covered in recent posts:
 
-SEO & BACKLINK REQUIREMENTS (very important):
-- Target ONE primary keyword phrase (e.g. "marquee hire in Naas") and use it naturally 4-6 times
-- Include 2-4 OUTBOUND links to real, authoritative local resources that will help build topical authority and encourage reciprocal links. Examples:
-    * Local county council tourism page (e.g. kildare.ie, kilkenny.ie, carlow.ie, laois.ie, waterford.ie, tipperary.ie, wicklow.ie)
-    * Local GAA club or community venue relevant to events
-    * Ireland's national tourism board: https://www.ireland.ie/en/
-    * Irish wedding planning resource: https://www.confetti.ie/
-    * Outdoor events Ireland resource: https://www.discoveireland.ie/ (adjust URL pattern)
-    * CCPC consumer rights (relevant for policy posts): https://www.ccpc.ie/
-  Format outbound links as: <a href="URL" target="_blank" rel="noopener">anchor text</a>
-- Add ONE internal link to a relevant page on https://www.grandoccasionrental.ie (e.g. /products, /faq, /delivery-policy, /contact)
-- Use a clear H1 equivalent in the title (do not put H1 in content), H2 section headings, and H3 sub-headings where appropriate
-- Include a meta-description-quality excerpt (under 160 chars, includes primary keyword)
-- End with a strong CTA paragraph including phone number and email
+LOCATION OPTIONS (pick one):
+{chr(10).join(f"  - {loc}" for loc in fresh_locations[:15])}
 
-CONTENT FORMAT — return ONLY valid JSON (no markdown, no commentary):
+TOPIC OPTIONS (pick one — these are researched from competitor blogs in Ireland):
+{chr(10).join(f"  - [{cat}] {idea}" for cat, idea in fresh_topics[:20])}
+
+WRITING RULES:
+1. 750-1000 words, rich and useful — not thin filler content
+2. Use Irish spelling and context (e.g. "colour", "organisation", "Co. Kildare", GAA, communions, etc.)
+3. For seasonal-local posts: weave the location naturally throughout — mention local landmarks, roads, venues, or community events where they add credibility
+4. For event-planning-tips: give specific, actionable advice based on real Irish event hire challenges (rain, soft ground, access on Irish country lanes, etc.)
+5. For safety-guide posts: reference the EN14960 standard and IIHF (Irish Inflatable Hirers Federation) where relevant
+6. For real-event-showcase: make it feel authentic — give the family a plausible Irish name, a real-sounding local venue, believable guest count
+
+SEO REQUIREMENTS:
+- Primary keyword: include it in the title and naturally 4–6 times in the body
+- H2 section headings (3–5 of them), H3 sub-headings where useful
+- Excerpt: under 160 chars, includes the primary keyword
+- DO NOT put the H1/title inside the content field
+
+OUTBOUND LINKS (include 2–3 of these in the article body — use natural anchor text):
+{outbound_hint}
+Format: <a href="URL" target="_blank" rel="noopener">anchor text</a>
+
+INTERNAL LINK: Link naturally to one of these once in the article:
+  - https://www.grandoccasionrental.ie/products
+  - https://www.grandoccasionrental.ie/faq
+  - https://www.grandoccasionrental.ie/delivery-policy
+  - https://www.grandoccasionrental.ie/contact
+
+CTA: End with a paragraph inviting readers to call 085 156 3498 or email info@grandoccasionrental.ie
+
+OUTPUT — return ONLY valid JSON, no markdown fences, no commentary outside the JSON:
 {{
   "title": "...",
   "slug": "...",
   "excerpt": "...",
-  "content": "...full HTML using h2/h3/p/ul/li/a tags, no inline styles...",
-  "category": "...",
+  "content": "...full HTML...",
+  "category": "seasonal-local|event-planning-tips|product-spotlight|real-event-showcase|safety-guide",
   "read_time": "X min read"
 }}"""
 
     raw = claude(prompt)
-
-    # Strip markdown code fences if present
     raw = raw.strip()
     if raw.startswith("```"):
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -187,20 +298,19 @@ CONTENT FORMAT — return ONLY valid JSON (no markdown, no commentary):
 
     post_data = json.loads(raw.strip())
 
-    # Ensure slug is safe
     if not post_data.get("slug"):
         post_data["slug"] = slugify(post_data["title"])
 
     post_data["author"] = "Grand Occasion Rentals"
     post_data["publishedAt"] = f"{today}T09:00:00.000Z"
 
-    # ── 3. Publish to Strapi ──
+    # ── 3. Publish ─────────────────────────────────────────────────────────
     result = strapi_post(post_data)
     new_id = result["data"]["id"]
     new_title = result["data"]["attributes"]["title"]
-    print(f"✅ Published post #{new_id}: {new_title}")
-    print(f"   Slug: {result['data']['attributes']['slug']}")
-    print(f"   Category: {result['data']['attributes'].get('category')}")
+    print(f"Published post #{new_id}: {new_title}")
+    print(f"Slug: {result['data']['attributes']['slug']}")
+    print(f"Category: {result['data']['attributes'].get('category')}")
 
 
 if __name__ == "__main__":
