@@ -554,6 +554,23 @@ const CheckoutMain = () => {
                     stripe payment section, so we can keep in touch incase your pick up is delayed
                   </p>
                 )}
+                {/* Non-refundable deposit acknowledgment */}
+                <div className={`flex items-start gap-3 p-3 rounded-[6px] border ${errors?.deposit_acknowledged ? 'border-red-400 bg-red-50' : 'border-orange-200 bg-orange-50'}`}>
+                  <input
+                    type="checkbox"
+                    id="deposit_acknowledged"
+                    className="mt-1 w-4 h-4 accent-orange-500 cursor-pointer shrink-0"
+                    {...register('deposit_acknowledged')}
+                  />
+                  <label htmlFor="deposit_acknowledged" className="text-[13px] leading-[1.5] cursor-pointer">
+                    I understand that a <strong>30% non-refundable deposit</strong> will be charged today to secure my booking. The remaining balance is due 14 days before my event date. By proceeding I confirm I have read and agreed to the{' '}
+                    <a href="/cancellation-policy" target="_blank" className="text-orange-600 underline font-semibold">Cancellation Policy</a>.
+                  </label>
+                </div>
+                {errors?.deposit_acknowledged && (
+                  <p className="text-red-500 text-[12px] -mt-2">{errors.deposit_acknowledged.message}</p>
+                )}
+
                 <div className="flex justify-between items-center">
                   <button
                     type="button"
@@ -574,16 +591,15 @@ const CheckoutMain = () => {
                         d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"
                       />
                     </svg>
-
                     <span className="text-[14px]">Back</span>
                   </button>
                   <button
                     type="button"
-                    disabled={redirectLoading}
+                    disabled={redirectLoading || !!errors?.deposit_acknowledged || !watch('deposit_acknowledged')}
                     onClick={() => handlePayment()}
-                    className="bg-orange-1 h-[2.5rem] px-2 rounded-[4px] text-[14px]  hover:opacity-90 transition-opacity ease-in-out duration-300 z-[1]"
+                    className="bg-orange-1 h-[2.5rem] px-2 rounded-[4px] text-[14px] hover:opacity-90 transition-opacity ease-in-out duration-300 z-[1] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {redirectLoading ? `Redirecting to Stripe...` : `Continue`}
+                    {redirectLoading ? `Redirecting to Stripe...` : `Continue to Payment`}
                   </button>
                 </div>
               </>
