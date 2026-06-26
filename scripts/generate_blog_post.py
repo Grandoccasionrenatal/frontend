@@ -146,6 +146,8 @@ def strapi_post(data):
         headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
         timeout=30,
     )
+    if not r.ok:
+        print("Strapi error response:", r.status_code, r.text[:1000])
     r.raise_for_status()
     return r.json()
 
