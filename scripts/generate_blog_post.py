@@ -389,6 +389,11 @@ OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the J
     if not post_data.get("slug"):
         post_data["slug"] = slugify(post_data["title"])
 
+    # Strapi only accepts these 4 category values - remap any extras
+    VALID_CATEGORIES = {"event-planning-tips", "product-spotlight", "real-event-showcase", "seasonal-local"}
+    if post_data.get("category") not in VALID_CATEGORIES:
+        post_data["category"] = "event-planning-tips"
+
     post_data["author"] = "Grand Occasion Rentals"
     post_data["publishedAt"] = f"{today}T09:00:00.000Z"
 
