@@ -13,7 +13,7 @@ Topic research based on competitor blogs:
 """
 import os, json, re
 from datetime import datetime, timezone
-import urllib.request
+import requests
 
 STRAPI_URL = os.environ["STRAPI_URL"]
 STRAPI_TOKEN = os.environ["STRAPI_TOKEN"]
@@ -129,48 +129,42 @@ OUTBOUND_LINKS = {
 
 
 def strapi_get(path):
-    req = urllib.request.Request(
+    r = requests.get(
         f"{STRAPI_URL}{path}",
         headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
+        timeout=20,
     )
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read())
+    r.raise_for_status()
+    return r.json()
 
 
 def strapi_post(data):
-    body = json.dumps({"data": data}).encode()
-    req = urllib.request.Request(
+    r = requests.post(
         f"{STRAPI_URL}/api/blog-posts",
-        data=body,
-        headers={
-            "Authorization": f"Bearer {STRAPI_TOKEN}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
+        json={"data": data},
+        headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
+        timeout=30,
     )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())
+    r.raise_for_status()
+    return r.json()
 
 
 def claude(prompt):
-    body = json.dumps({
-        "model": "claude-opus-4-8",
-        "max_tokens": 4096,
-        "messages": [{"role": "user", "content": prompt}],
-    }).encode()
-    req = urllib.request.Request(
+    r = requests.post(
         "https://api.anthropic.com/v1/messages",
-        data=body,
+        json={
+            "model": "claude-opus-4-8",
+            "max_tokens": 4096,
+            "messages": [{"role": "user", "content": prompt}],
+        },
         headers={
             "x-api-key": ANTHROPIC_API_KEY,
             "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
         },
-        method="POST",
+        timeout=90,
     )
-    with urllib.request.urlopen(req, timeout=90) as r:
-        resp = json.loads(r.read())
-    return resp["content"][0]["text"]
+    r.raise_for_status()
+    return r.json()["content"][0]["text"]
 
 
 def slugify(title):
