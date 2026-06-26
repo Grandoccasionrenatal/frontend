@@ -30,7 +30,7 @@ const FALLBACK_REVIEWS: reviewInterface[] = [
 
 const Reviews = () => {
   const [currentSlide, setCurrentSlide] = useState<any>(0);
-  const [reviews, setReviews] = useState<reviewInterface[]>([]);
+  const [reviews, setReviews] = useState<reviewInterface[]>(FALLBACK_REVIEWS);
   const [loaded, setLoaded] = useState<any>(false);
 
   // const reviewsData: Promise<apiInterface<reviewInterface[]>> = otherServices.getReviews();
