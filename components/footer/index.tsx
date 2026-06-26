@@ -38,6 +38,11 @@ const footerLinks: Record<
       title: `Terms of Service`,
       link: `/${CONSTANTS.ROUTES['terms-of-service']}`,
       isExternalLink: false
+    },
+    {
+      title: `Cancellation Policy`,
+      link: `/${CONSTANTS.ROUTES['cancellation-policy']}`,
+      isExternalLink: false
     }
   ],
   Company: [{ title: `About`, link: `/about` }],
