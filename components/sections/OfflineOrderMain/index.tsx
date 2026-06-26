@@ -45,9 +45,34 @@ const OfflineOrderMain = () => {
     defaultValues: {}
   });
 
+  const sendNotification = async (orderData: offlineTransactionInterface, total: number) => {
+    try {
+      await fetch('/api/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: orderData.customer_name,
+          customer_email: orderData.customer_email,
+          phone_number: orderData.phone_number,
+          address: orderData.address,
+          details: orderData.details,
+          items: orderData.transaction_items.map((i) => ({
+            name: i.product.attributes.name ?? 'Item',
+            quantity: i.units,
+            price: i.total_price
+          })),
+          total
+        })
+      });
+    } catch {
+      // notification failure is non-fatal
+    }
+  };
+
   const { mutate, isLoading } = useMutation<any, any, offlineTransactionInterface>({
     mutationFn: (data) => transactionService.createOfflineOrder(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      sendNotification(variables, aggregate.total);
       toast.success(`Your enquiry has been submitted! We'll be in touch shortly.`);
       clearCart();
       router.push(`/?success=true`);
