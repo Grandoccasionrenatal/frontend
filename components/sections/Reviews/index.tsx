@@ -49,10 +49,10 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await otherServices.getReviews();
-        const data = res?.data;
-        setReviews(data?.length ? data : FALLBACK_REVIEWS);
-      } catch (error) {
+        const res = await fetch('/api/google-reviews');
+        const data = await res.json();
+        setReviews(data?.reviews?.length ? data.reviews : FALLBACK_REVIEWS);
+      } catch {
         setReviews(FALLBACK_REVIEWS);
       }
     };
@@ -160,38 +160,32 @@ const Reviews = () => {
                 </svg>
                 <p className="max-w-[40rem] font-[600] text-center">{i?.attributes.review}</p>
                 <div className="flex items-center gap-2">
-                     {/* <div className="w-[60px] relative h-[60px] overflow-hidden rounded-[50px]">
-                  <Image
-                width={100}
-                height={400}
-                  // placeholder={`blur`}
-                  // blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
-                  // fill={true}
-                  alt=""
-                  className="w-full h-auto bg-center bg-contain"
-                  src="https://i0.wp.com/africavarsities.com/wp-content/uploads/2019/07/Hamamat-photo.jpg?resize=713%2C983&ssl=1"
-                />  
-                  </div>*/}
                   <div className="flex flex-col items-center">
                     <span className="font-[700] text-[18px]">{i?.attributes?.name}</span>
+                    {(i?.attributes as any)?.relative_time && (
+                      <span className="text-xs text-gray-400 mb-1">{(i.attributes as any).relative_time}</span>
+                    )}
                     <div className="flex items-center gap-[4px]">
-                      {[...Array(5)]?.map((i, idx) => (
-                        <svg
-                          key={idx}
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="currentcolor"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-6 h-6 text-orange-1"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-                          />
-                        </svg>
-                      ))}
+                      {[...Array(5)]?.map((_, idx) => {
+                        const rating = (i?.attributes as any)?.rating ?? 5;
+                        return (
+                          <svg
+                            key={idx}
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill={idx < rating ? 'currentcolor' : 'none'}
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-6 h-6 text-orange-1"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+                            />
+                          </svg>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
