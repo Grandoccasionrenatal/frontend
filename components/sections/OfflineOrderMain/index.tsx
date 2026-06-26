@@ -210,7 +210,7 @@ const OfflineOrderMain = () => {
           </InputErrorWrapper>
 
           <p className="text-[12px] text-gray-500">
-            <span className="text-red-500">*</span> Required fields. We'll contact you within 24 hours to confirm your booking and arrange payment.
+            <span className="text-red-500">*</span> Required fields. We&apos;ll contact you within 24 hours to confirm your booking and arrange payment.
           </p>
 
           <button
