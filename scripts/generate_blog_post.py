@@ -400,7 +400,7 @@ OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the J
     if img_bytes:
         alt_text = f"{title} - Grand Occasion Rental"
         media_id = upload_image_to_strapi(img_bytes, filename, alt_text)
-        post_data["cover_image"] = media_id
+        post_data["cover_image"] = {"id": media_id}
         print(f"Uploaded cover image #{media_id} (photo by {photographer} via Pexels)")
     else:
         print("Warning: no Pexels image found, posting without cover image")
