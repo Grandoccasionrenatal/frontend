@@ -189,6 +189,14 @@ const Nav = () => {
                         </NavigationMenuItem>
                       </NavigationMenuList>
                     </NavigationMenu>
+                  ) : i?.title === 'Get a Quote' ? (
+                    <Link
+                      href={`/${i?.link}`}
+                      key={idx}
+                      className="bg-orange-1 text-white text-[14px] font-[600] px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity duration-200"
+                    >
+                      {i?.title}
+                    </Link>
                   ) : (
                     <Link
                       href={`/${i?.link}`}

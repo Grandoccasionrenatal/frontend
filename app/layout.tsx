@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import NextTopLoader from 'nextjs-toploader';
 import { Analytics } from '@vercel/analytics/react';
+import { GTMScript, GTMNoScript } from '@/components/GoogleTagManager';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -57,6 +58,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter?.variable}  ${giliran?.variable}  text-black-1`}>
+        <GTMNoScript />
+        <GTMScript />
         <NextTopLoader
           color="#FF9E00"
           initialPosition={0.08}

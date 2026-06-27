@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import Nav from '@/components/nav';
 const Footer = dynamic(() => import('@/components/footer'), { ssr: false });
+const FloatingContact = dynamic(() => import('@/components/FloatingContact'), { ssr: false });
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -8,6 +9,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <Nav />
       {children}
       <Footer />
+      <FloatingContact />
     </div>
   );
 };
