@@ -27,7 +27,7 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
     };
 
     try {
-      await fetch(webhookUrl, {
+      await fetch('/api/booking-webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
