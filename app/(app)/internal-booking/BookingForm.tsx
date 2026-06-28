@@ -12,9 +12,10 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
     setStatus('loading');
 
     const fd = new FormData(e.currentTarget);
-    const data = {
+    const email = fd.get('customer_email') as string;
+    const data: Record<string, unknown> = {
       customer_name: fd.get('customer_name'),
-      customer_email: fd.get('customer_email'),
+      ...(email ? { customer_email: email } : {}),
       phone: fd.get('phone'),
       event_date: fd.get('event_date'),
       event_location: fd.get('event_location'),
