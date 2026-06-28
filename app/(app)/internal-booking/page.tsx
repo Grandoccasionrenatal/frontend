@@ -13,7 +13,7 @@ export default function InternalBookingPage() {
           <p className="text-sm text-gray-500 mt-1">Fill this in when a deposit is received from any source.</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <BookingForm webhookUrl="https://hook.eu1.make.com/l1io5pc6yidrlbcqtmgmdxrpyyygho4y" />
+          <BookingForm webhookUrl="https://hook.eu1.make.com/ldubnx15vcwrycihbsoaf0i0qd6ha6k2" />
         </div>
       </div>
     </div>
