@@ -7,6 +7,7 @@ const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House
 
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [skipEmail, setSkipEmail] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
       deposit_amount: fd.get('deposit_amount'),
       reference_code: fd.get('reference_code'),
       notes: fd.get('notes'),
+      skip_email: skipEmail,
     };
 
     try {
@@ -140,9 +142,15 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
           className="rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
       </div>
 
+      <label className="flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" checked={skipEmail} onChange={e => setSkipEmail(e.target.checked)}
+          className="w-4 h-4 accent-orange-500" />
+        <span className="text-sm text-gray-700">Skip confirmation email (Notion only)</span>
+      </label>
+
       {status === 'success' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-800 text-sm font-medium">
-          Booking recorded! Confirmation email sent and Notion updated.
+          Booking recorded! {skipEmail ? 'Notion updated (no email sent).' : 'Confirmation email sent and Notion updated.'}
         </div>
       )}
       {status === 'error' && (

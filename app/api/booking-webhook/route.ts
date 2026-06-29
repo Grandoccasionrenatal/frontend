@@ -210,7 +210,7 @@ export async function POST(req: NextRequest) {
 
   // Send styled confirmation email + PDF invoice via Resend
   const apiKey = process.env.RESEND_API_KEY;
-  if (apiKey && data.customer_email) {
+  if (apiKey && data.customer_email && !data.skip_email) {
     const today = new Date().toISOString().split('T')[0];
     const invoiceNum = data.reference_code
       ? `INV-${data.reference_code.toUpperCase()}`
