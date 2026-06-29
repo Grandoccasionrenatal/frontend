@@ -50,6 +50,9 @@ const ProfileDrop = () => {
           <DropdownMenuItem asChild>
             <Link href="/internal-booking">Record Booking</Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/internal-review">Send Review Request</Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setLogoutOpen(true)}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
