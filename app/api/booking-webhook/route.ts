@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import React from 'react';
-import { renderToBuffer } from '@react-pdf/renderer';
-import { InvoicePDF } from '@/lib/invoice';
 
 function buildConfirmationEmail(data: Record<string, string>): string {
   const {
@@ -211,26 +208,9 @@ export async function POST(req: NextRequest) {
     console.error('Notion sync failed:', err);
   }
 
-  // Send styled confirmation email + invoice PDF via Resend
+  // Send styled confirmation email via Resend
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey && data.customer_email) {
-    const today = new Date().toISOString().split('T')[0];
-    const invoiceNum = data.reference_code
-      ? `INV-${data.reference_code.toUpperCase()}`
-      : `INV-${today.replace(/-/g, '')}`;
-
-    // Try to generate PDF — if it fails, send email without attachment
-    let attachments: { filename: string; content: string }[] = [];
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfBuffer = await renderToBuffer(
-        React.createElement(InvoicePDF, { data, invoiceDate: today }) as any
-      );
-      attachments = [{ filename: `${invoiceNum}.pdf`, content: pdfBuffer.toString('base64') }];
-    } catch (pdfErr) {
-      console.error('PDF generation failed, sending email without attachment:', pdfErr);
-    }
-
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -243,7 +223,6 @@ export async function POST(req: NextRequest) {
           to: [data.customer_email],
           subject: `Your booking has been confirmed — Grand Occasion Rentals`,
           html: buildConfirmationEmail(data),
-          ...(attachments.length > 0 ? { attachments } : {}),
         }),
       });
     } catch (emailErr) {
