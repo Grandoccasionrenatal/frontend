@@ -159,16 +159,23 @@ export async function POST(req: NextRequest) {
   // Send styled confirmation email + invoice PDF via Resend
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey && data.customer_email) {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const invoiceNum = data.reference_code
-        ? `INV-${data.reference_code.toUpperCase()}`
-        : `INV-${today.replace(/-/g, '')}`;
+    const today = new Date().toISOString().split('T')[0];
+    const invoiceNum = data.reference_code
+      ? `INV-${data.reference_code.toUpperCase()}`
+      : `INV-${today.replace(/-/g, '')}`;
 
+    // Try to generate PDF — if it fails, send email without attachment
+    let attachments: { filename: string; content: string }[] = [];
+    try {
       const pdfBuffer = await renderToBuffer(
         React.createElement(InvoicePDF, { data, invoiceDate: today })
       );
+      attachments = [{ filename: `${invoiceNum}.pdf`, content: pdfBuffer.toString('base64') }];
+    } catch (pdfErr) {
+      console.error('PDF generation failed, sending email without attachment:', pdfErr);
+    }
 
+    try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -180,16 +187,11 @@ export async function POST(req: NextRequest) {
           to: [data.customer_email],
           subject: `Your booking has been confirmed — Grand Occasion Rentals`,
           html: buildConfirmationEmail(data),
-          attachments: [
-            {
-              filename: `${invoiceNum}.pdf`,
-              content: pdfBuffer.toString('base64'),
-            },
-          ],
+          ...(attachments.length > 0 ? { attachments } : {}),
         }),
       });
-    } catch (err) {
-      console.error('Invoice/email error:', err);
+    } catch (emailErr) {
+      console.error('Email send error:', emailErr);
     }
   }
 
