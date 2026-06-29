@@ -125,10 +125,10 @@ function buildConfirmationEmail(data: Record<string, string>): string {
             <p style="margin:16px 0 0;font-size:14px;color:#444;">We look forward to helping make your event a memorable one!</p>
             <p style="margin:12px 0 0;font-size:14px;font-weight:600;">Best regards,<br/>Grand Occasion Rentals</p>
             <hr style="border:none;border-top:1px solid #f0e4d0;margin:20px 0 16px;"/>
-            <p style="margin:0;font-size:12px;color:#999;text-align:center;">
-              <a href="https://www.grandoccasionrental.ie/cancellation-policy" style="color:#999;">Cancellation Policy</a> &nbsp;|&nbsp;
-              <a href="https://www.grandoccasionrental.ie/delivery-policy" style="color:#999;">Delivery Policy</a> &nbsp;|&nbsp;
-              <a href="https://www.grandoccasionrental.ie/terms-of-service" style="color:#999;">Terms of Service</a>
+            <p style="margin:0;font-size:12px;text-align:center;">
+              <a href="https://www.grandoccasionrental.ie/cancellation-policy" style="color:#d96f00;font-weight:600;text-decoration:none;">Cancellation Policy</a> &nbsp;|&nbsp;
+              <a href="https://www.grandoccasionrental.ie/delivery-policy" style="color:#d96f00;font-weight:600;text-decoration:none;">Delivery Policy</a> &nbsp;|&nbsp;
+              <a href="https://www.grandoccasionrental.ie/terms-of-service" style="color:#d96f00;font-weight:600;text-decoration:none;">Terms of Service</a>
             </p>
             <p style="margin:8px 0 0;font-size:12px;color:#aaa;text-align:center;">
               © Grand Occasion Rentals · <a href="https://www.grandoccasionrental.ie" style="color:#aaa;">grandoccasionrental.ie</a>
