@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-const SOURCES = ['WhatsApp', 'Instagram', 'Facebook', 'Website', 'Walk-in', 'Phone Call'];
+const SOURCES = ['WhatsApp', 'Instagram', 'Softplay Instagram', 'Facebook', 'Facebook Marketplace', 'Gmail', 'Website', 'Walk-in', 'Phone Call'];
 const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House', 'Chairs & Tables', 'Decoration', 'Mixed'];
 
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {

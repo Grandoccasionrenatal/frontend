@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House', 'Chairs & Tables', 'Decoration', 'Mixed'];
-const SOURCES = ['WhatsApp', 'Instagram', 'Facebook', 'Google', 'Friend/Family', 'Walk-in', 'Other'];
+const SOURCES = ['WhatsApp', 'Instagram', 'Softplay Instagram', 'Facebook', 'Facebook Marketplace', 'Gmail', 'Google', 'Friend/Family', 'Walk-in', 'Other'];
 const ACCESSIBILITY = ['Open access', 'Side gate', 'Elevator', 'Staircase', 'Other'];
 
 export default function EnquiryForm() {
