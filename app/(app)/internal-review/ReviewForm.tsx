@@ -86,14 +86,8 @@ export default function ReviewForm() {
             checked={reminder}
             onChange={e => setReminder(e.target.checked)}
           />
-          <div
-            onClick={() => setReminder(r => !r)}
-            className={`w-10 h-6 rounded-full transition-colors duration-200 ${reminder ? 'bg-orange-500' : 'bg-gray-300'}`}
-          />
-          <div
-            onClick={() => setReminder(r => !r)}
-            className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${reminder ? 'translate-x-5' : 'translate-x-1'}`}
-          />
+          <div className={`w-10 h-6 rounded-full transition-colors duration-200 ${reminder ? 'bg-orange-500' : 'bg-gray-300'}`} />
+          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${reminder ? 'translate-x-5' : 'translate-x-1'}`} />
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-800">Send 7-day reminder</p>
