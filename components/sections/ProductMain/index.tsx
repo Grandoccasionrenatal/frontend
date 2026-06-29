@@ -330,9 +330,13 @@ const ProductMain = ({ categories, initialData }: IProductMain) => {
     // Build up our filters object
     const filters: any = {};
 
-    // 1) If user typed a search string, do a case-insensitive partial match on product name
+    // 1) If user typed a search string, search product name AND category name
     if (debouncedSearchFilter) {
-      filters.name = { $containsi: debouncedSearchFilter };
+      filters.$or = [
+        { name: { $containsi: debouncedSearchFilter } },
+        { product_categories: { name: { $containsi: debouncedSearchFilter } } },
+        { description: { $containsi: debouncedSearchFilter } },
+      ];
     }
     // 2) Otherwise, if the user picked a category (and not "All Items"), do exact (but case-insensitive) match
     else if (currFilter !== 'All Items') {

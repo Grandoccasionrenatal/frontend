@@ -126,9 +126,15 @@ const Cart = () => {
                     )}
                   </p>
                   <UnitSelect
-                    setErrors={(i) => setVerifiedInput(!i)}
+                    setErrors={(err) => setVerifiedInput(!err)}
                     setCount={(num) => updateQuantity(i?.product?.id, num)}
-                    max={i?.product?.attributes?.available_units}
+                    max={(() => {
+                      const cats: any[] = i?.product?.attributes?.product_categories?.data ?? [];
+                      const isFurniture = cats.some((c: any) =>
+                        /chair|table|furniture/i.test(c?.attributes?.name ?? '')
+                      );
+                      return isFurniture ? 999 : (i?.product?.attributes?.available_units ?? 999);
+                    })()}
                   />
                 </div>
               </div>
