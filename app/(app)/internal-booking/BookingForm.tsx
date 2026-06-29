@@ -8,6 +8,7 @@ const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [skipEmail, setSkipEmail] = useState(false);
+  const [autoReview, setAutoReview] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,6 +32,7 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
       reference_code: fd.get('reference_code'),
       notes: fd.get('notes'),
       skip_email: skipEmail,
+      auto_review: autoReview,
     };
 
     try {
@@ -148,9 +150,15 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
         <span className="text-sm text-gray-700">Skip confirmation email (Notion only)</span>
       </label>
 
+      <label className="flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" checked={autoReview} onChange={e => setAutoReview(e.target.checked)}
+          className="w-4 h-4 accent-orange-500" />
+        <span className="text-sm text-gray-700">Auto-send review request 3 days after event</span>
+      </label>
+
       {status === 'success' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-800 text-sm font-medium">
-          Booking recorded! {skipEmail ? 'Notion updated (no email sent).' : 'Confirmation email sent and Notion updated.'}
+          Booking recorded! {skipEmail ? 'Notion updated (no email sent).' : 'Confirmation email sent and Notion updated.'}{autoReview && !skipEmail ? ' Review request will be sent 3 days after the event.' : ''}
         </div>
       )}
       {status === 'error' && (
