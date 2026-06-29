@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 const SOURCES = ['WhatsApp', 'Instagram', 'Facebook', 'Website', 'Walk-in', 'Phone Call'];
+const BOOKING_TYPES = ['Marquee', 'Soft Play', 'Chairs & Tables', 'Decoration', 'Mixed'];
 
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -22,6 +23,7 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
       pickup_date: fd.get('pickup_date'),
       event_location: fd.get('event_location'),
       items: fd.get('items'),
+      booking_type: fd.get('booking_type'),
       source: fd.get('source'),
       total_amount: fd.get('total_amount'),
       deposit_amount: fd.get('deposit_amount'),
@@ -97,6 +99,15 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
             {SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-semibold">Booking Type <span className="text-red-500">*</span></label>
+        <select name="booking_type" required
+          className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+          <option value="">Select type</option>
+          {BOOKING_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
       </div>
 
       <div className="flex flex-col gap-1">

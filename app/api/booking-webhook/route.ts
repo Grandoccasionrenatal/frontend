@@ -175,6 +175,9 @@ async function syncToNotion(data: Record<string, string>) {
     props['Deposit Amount'] = { number: parseFloat(data.deposit_amount) };
     props['Deposit Paid'] = { checkbox: true };
   }
+  if (data.booking_type) {
+    props['Booking Type'] = { select: { name: data.booking_type } };
+  }
 
   const res = await fetch('https://api.notion.com/v1/pages', {
     method: 'POST',
