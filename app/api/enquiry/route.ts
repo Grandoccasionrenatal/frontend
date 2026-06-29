@@ -18,7 +18,7 @@ async function syncEnquiryToNotion(data: Record<string, string>) {
     'Customer Name': { title: [{ text: { content: data.customer_name || '' } }] },
     'Event Location': { rich_text: [{ text: { content: data.postcode || '' } }] },
     'Items Booked': { rich_text: [{ text: { content: details } }] },
-    'Status': { status: { name: 'Enquiry' } },
+    'Status': { status: { name: 'Pending' } },
   };
 
   if (data.customer_email) props['Email Address'] = { rich_text: [{ text: { content: data.customer_email } }] };
@@ -71,7 +71,7 @@ function buildNotificationEmail(data: Record<string, string>): string {
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr>
           <td style="background:#d96f00;padding:24px 32px;border-radius:10px 10px 0 0;">
-            <h1 style="margin:0;color:#fff;font-size:20px;">New Booking Enquiry</h1>
+            <h1 style="margin:0;color:#fff;font-size:20px;">New Booking Details Received</h1>
             <p style="margin:4px 0 0;color:#ffd9b0;font-size:13px;">Via grandoccasionrental.ie/enquiry</p>
           </td>
         </tr>
@@ -110,7 +110,7 @@ function buildAutoReplyEmail(name: string): string {
           <td style="background:#ffffff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
             <p style="margin:0;font-size:16px;">Hi <strong>${name}</strong>,</p>
             <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
-              Thank you for reaching out to Grand Occasion Rentals! We've received your enquiry and will get back to you <strong>within 24 hours</strong> to confirm availability and let you know the deposit amount to secure your booking.
+              Thank you for choosing Grand Occasion Rentals! We've received your booking details and will be in touch <strong>shortly</strong> with your deposit information to confirm and secure your booking.
             </p>
             <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
               In the meantime, if you need to reach us urgently, feel free to WhatsApp or call us on
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
           from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
           to: ['info@grandoccasionrental.ie'],
           reply_to: data.customer_email || undefined,
-          subject: `New enquiry from ${data.customer_name} — ${data.booking_type || 'General'}`,
+          subject: `New booking details from ${data.customer_name} — ${data.booking_type || 'General'}`,
           html: buildNotificationEmail(data),
         }),
       });
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
             to: [data.customer_email],
-            subject: `We've received your enquiry — Grand Occasion Rentals`,
+            subject: `Booking details received — Grand Occasion Rentals`,
             html: buildAutoReplyEmail(data.customer_name),
           }),
         });

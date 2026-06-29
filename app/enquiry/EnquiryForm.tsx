@@ -49,9 +49,9 @@ export default function EnquiryForm() {
     return (
       <div className="text-center py-8">
         <div className="text-5xl mb-4">🎉</div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">We've received your enquiry!</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Details received!</h2>
         <p className="text-gray-500 text-sm leading-relaxed">
-          Thank you! We'll be in touch within 24 hours to confirm availability and let you know the deposit amount to secure your booking.
+          Thank you! We'll be in touch shortly with your deposit details to confirm and secure your booking.
         </p>
         <p className="mt-4 text-sm text-gray-400">
           Need us sooner? WhatsApp <a href="tel:+353851563498" className="text-orange-500 font-medium">085 156 3498</a>
@@ -133,8 +133,8 @@ export default function EnquiryForm() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-semibold text-gray-700">Tell us more about your event (optional)</label>
-        <textarea name="items" rows={3} placeholder="e.g. Birthday party for 50 guests, need a 6x9m marquee and 30 chairs..."
+        <label className="text-sm font-semibold text-gray-700">Items / What you're hiring (optional)</label>
+        <textarea name="items" rows={3} placeholder="e.g. 6x9m Marquee, 30 chairs, soft play package..."
           className="rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
       </div>
 
@@ -159,10 +159,10 @@ export default function EnquiryForm() {
 
       <button type="submit" disabled={status === 'loading'}
         className="bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 mt-2">
-        {status === 'loading' ? 'Sending...' : 'Send Enquiry'}
+        {status === 'loading' ? 'Sending...' : 'Submit Booking Details'}
       </button>
 
-      <p className="text-xs text-gray-400 text-center">We'll reply within 24 hours to confirm availability and arrange your deposit.</p>
+      <p className="text-xs text-gray-400 text-center">We'll send you deposit details shortly to confirm your booking.</p>
 
     </form>
   );

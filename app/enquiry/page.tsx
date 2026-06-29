@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import EnquiryForm from './EnquiryForm';
 
 export const metadata: Metadata = {
-  title: 'Book an Event — Grand Occasion Rentals',
-  description: 'Fill in your event details and we\'ll get back to you within 24 hours.',
+  title: 'Secure Your Booking — Grand Occasion Rentals',
+  description: 'Fill in your details to secure your booking with Grand Occasion Rentals.',
   robots: { index: false },
 };
 
@@ -13,9 +13,9 @@ export default function EnquiryPage() {
       <div className="max-w-xl mx-auto">
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Request a Booking</h1>
-          <p className="text-gray-500 text-sm">
-            Fill in your details below and we'll get back to you within 24 hours to confirm availability and arrange your deposit.
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Secure Your Booking</h1>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            Please fill in the details below so we can get everything ready for your event. Once we receive this, we'll send you the deposit details to confirm your booking.
           </p>
         </div>
 
@@ -24,7 +24,7 @@ export default function EnquiryPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          Prefer to chat? WhatsApp or call us on{' '}
+          Need help? WhatsApp or call us on{' '}
           <a href="tel:+353851563498" className="text-orange-500 font-medium">085 156 3498</a>
         </p>
 
