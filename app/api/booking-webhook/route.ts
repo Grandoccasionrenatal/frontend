@@ -222,8 +222,9 @@ export async function POST(req: NextRequest) {
     // Try to generate PDF — if it fails, send email without attachment
     let attachments: { filename: string; content: string }[] = [];
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pdfBuffer = await renderToBuffer(
-        React.createElement(InvoicePDF, { data, invoiceDate: today })
+        React.createElement(InvoicePDF, { data, invoiceDate: today }) as any
       );
       attachments = [{ filename: `${invoiceNum}.pdf`, content: pdfBuffer.toString('base64') }];
     } catch (pdfErr) {
