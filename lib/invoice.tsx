@@ -253,6 +253,7 @@ export function InvoicePDF({ data, invoiceDate }: { data: InvoiceData; invoiceDa
         {/* Header */}
         <View style={styles.header}>
           <View style={{ width: 160 }}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image src={LOGO_SRC} style={{ width: 160, objectFit: 'contain' }} />
           </View>
           <View style={styles.invoiceRight}>
