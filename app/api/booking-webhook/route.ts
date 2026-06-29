@@ -243,6 +243,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
           to: [data.customer_email],
+          bcc: ['info@grandoccasionrental.ie'],
           subject: `Your booking has been confirmed — Grand Occasion Rentals`,
           html: buildConfirmationEmail(data),
           ...(attachments.length > 0 ? { attachments } : {}),
