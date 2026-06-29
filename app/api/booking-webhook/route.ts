@@ -146,15 +146,70 @@ function buildConfirmationEmail(data: Record<string, string>): string {
 </html>`;
 }
 
+const NOTION_DATABASE_ID = '34b22911-78c3-4c8e-a860-de396a0d96a2';
+
+async function syncToNotion(data: Record<string, string>) {
+  const notionKey = process.env.NOTION_API_KEY;
+  if (!notionKey) return;
+
+  const props: Record<string, unknown> = {
+    'Customer Name': { title: [{ text: { content: data.customer_name || '' } }] },
+    'Event Location': { rich_text: [{ text: { content: data.event_location || '' } }] },
+    'Items Booked': { rich_text: [{ text: { content: data.items || '' } }] },
+    'Source': { select: { name: data.source || 'Other' } },
+    'Reference Code': { rich_text: [{ text: { content: data.reference_code || '' } }] },
+  };
+
+  if (data.customer_email) {
+    props['Email Address'] = { rich_text: [{ text: { content: data.customer_email } }] };
+  }
+  if (data.phone) {
+    props['Phone'] = { phone_number: data.phone };
+  }
+  if (data.event_date) {
+    props['Rental Dates'] = {
+      date: {
+        start: data.event_date,
+        ...(data.pickup_date ? { end: data.pickup_date } : {}),
+      },
+    };
+  }
+  if (data.total_amount) {
+    props['Total Amount'] = { number: parseFloat(data.total_amount) };
+  }
+  if (data.deposit_amount) {
+    props['Deposit Amount'] = { number: parseFloat(data.deposit_amount) };
+    props['Deposit Paid'] = { checkbox: true };
+  }
+
+  const res = await fetch('https://api.notion.com/v1/pages', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${notionKey}`,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2022-06-28',
+    },
+    body: JSON.stringify({
+      parent: { database_id: NOTION_DATABASE_ID },
+      properties: props,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('Notion sync error:', err);
+  }
+}
+
 export async function POST(req: NextRequest) {
   const data = await req.json();
 
-  // Forward to Make.com for Notion sync only
-  await fetch('https://hook.eu1.make.com/ldubnx15vcwrycihbsoaf0i0qd6ha6k2', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
+  // Sync directly to Notion (bypasses Make.com which had the wrong database)
+  try {
+    await syncToNotion(data);
+  } catch (err) {
+    console.error('Notion sync failed:', err);
+  }
 
   // Send styled confirmation email + invoice PDF via Resend
   const apiKey = process.env.RESEND_API_KEY;
