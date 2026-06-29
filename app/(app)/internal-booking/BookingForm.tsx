@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 const SOURCES = ['WhatsApp', 'Instagram', 'Facebook', 'Website', 'Walk-in', 'Phone Call'];
-const BOOKING_TYPES = ['Marquee', 'Soft Play', 'Chairs & Tables', 'Decoration', 'Mixed'];
+const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle/Bubble House', 'Chairs & Tables', 'Decoration', 'Mixed'];
 
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
