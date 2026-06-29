@@ -165,10 +165,7 @@ async function syncToNotion(data: Record<string, string>) {
   }
   if (data.event_date) {
     props['Rental Dates'] = {
-      date: {
-        start: data.event_date,
-        ...(data.pickup_date ? { end: data.pickup_date } : {}),
-      },
+      date: { start: data.event_date },
     };
   }
   if (data.total_amount) {
