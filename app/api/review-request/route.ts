@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GOOGLE_REVIEW_URL = 'https://g.page/r/CdNyLqiuS_PVEAE/review';
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CWa1-VxQj7mIEBM/review';
 const FACEBOOK_REVIEW_URL = 'https://www.facebook.com/p/Grand-Occasion-Rental-61552746878438/reviews';
 
 function buildReviewEmail(data: {
