@@ -18,6 +18,8 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
       ...(email ? { customer_email: email } : {}),
       phone: fd.get('phone'),
       event_date: fd.get('event_date'),
+      delivery_date: fd.get('delivery_date'),
+      pickup_date: fd.get('pickup_date'),
       event_location: fd.get('event_location'),
       items: fd.get('items'),
       source: fd.get('source'),
@@ -64,6 +66,19 @@ export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
         <div className="flex flex-col gap-1">
           <label className="text-sm font-semibold">Event Date <span className="text-red-500">*</span></label>
           <input name="event_date" type="date" required
+            className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Delivery Date <span className="text-red-500">*</span></label>
+          <input name="delivery_date" type="date" required
+            className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Pick-up Date <span className="text-red-500">*</span></label>
+          <input name="pickup_date" type="date" required
             className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
         </div>
       </div>

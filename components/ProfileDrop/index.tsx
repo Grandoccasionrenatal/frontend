@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useAuthStore from '@/store/useAuthStore';
+import Link from 'next/link';
 
 import { getInitials } from '@/utils';
 
@@ -45,6 +46,10 @@ const ProfileDrop = () => {
       ) : (
         <DropdownMenuContent>
           <DropdownMenuLabel>{authDetails?.user?.username}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/internal-booking">Record Booking</Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setLogoutOpen(true)}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
