@@ -26,6 +26,8 @@ async function syncEnquiryToNotion(data: Record<string, string>) {
   if (data.event_date) props['Rental Dates'] = { date: { start: data.event_date } };
   if (data.booking_type) props['Booking Type'] = { select: { name: data.booking_type } };
   if (data.source) props['Source'] = { select: { name: data.source } };
+  if (data.total_amount) props['Total Amount'] = { number: parseFloat(data.total_amount) };
+  if (data.total_amount) props['Deposit Amount'] = { number: Math.round(parseFloat(data.total_amount) * 0.3 * 100) / 100 };
 
   const res = await fetch('https://api.notion.com/v1/pages', {
     method: 'POST',

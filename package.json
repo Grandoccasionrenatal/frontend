@@ -12,6 +12,7 @@
     "prettier:cqheck": "prettier --check --ignore-unknown ."
   },
   "dependencies": {
+    "stripe": "^14.0.0",
     "@cyntler/react-doc-viewer": "^1.14.1",
     "@react-pdf/renderer": "^3.4.4",
     "@heroicons/react": "^2.0.18",
