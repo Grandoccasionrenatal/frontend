@@ -22,18 +22,19 @@ const ProductReel = ({ images }: IProductReel) => {
   const [isPlaying, setPlaying] = useState<boolean>(true);
   const [expandOpen, setExpandOpen] = useState(false);
 
+  const imageList = images?.data ?? [];
+
   useInterval(
     () => {
-      if (images && currImage === images?.data.length - 1) {
+      if (!imageList.length) return;
+      if (currImage === imageList.length - 1) {
         setCurrImage(0);
       } else {
         setCurrImage((prev) => prev + 1);
       }
     },
-    isPlaying ? 3000 : null
+    isPlaying && imageList.length > 1 ? 3000 : null
   );
-
-  const imageList = images?.data ?? [];
 
   if (!imageList.length) {
     return (
