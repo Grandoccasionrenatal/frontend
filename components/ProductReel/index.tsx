@@ -33,6 +33,18 @@ const ProductReel = ({ images }: IProductReel) => {
     isPlaying ? 3000 : null
   );
 
+  const imageList = images?.data ?? [];
+
+  if (!imageList.length) {
+    return (
+      <div className="relative w-full h-full flex flex-col gap-6 md:gap-12">
+        <div className="bg-slate-100 min-h-[15rem] md:min-h-[25rem] flex-grow h-full w-full max-w-[34rem] relative mx-auto overflow-hidden rounded-custom grid place-items-center">
+          <span className="text-slate-400 text-sm">No image available</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Dialog open={expandOpen} onOpenChange={setExpandOpen}>
