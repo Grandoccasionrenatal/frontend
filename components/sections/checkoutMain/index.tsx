@@ -99,10 +99,11 @@ const CheckoutMain = () => {
   }, [getValues('return_date')]);
 
   const shippingTokens = useMemo(() => {
-    if (watch('user_location') && (watch('user_location') ?? 0) > 10) {
+    const loc = watch('user_location') ?? 0;
+    if (loc > 10) {
       return {
         isBaseFixedPrice: false,
-        total: watch('user_location') * Number(`${process.env.NEXT_PUBLIC_SHIPPING_FEE}`)
+        total: loc * Number(`${process.env.NEXT_PUBLIC_SHIPPING_FEE}`)
       };
     } else {
       return { isBaseFixedPrice: true, total: 10 };
@@ -159,7 +160,7 @@ const CheckoutMain = () => {
             };
           })
         ],
-        distance: parseInt(`${watch('user_location')}`),
+        distance: parseInt(`${watch('user_location') ?? 0}`),
         address: userAddress ?? {
           country: ``,
           city: ``,
