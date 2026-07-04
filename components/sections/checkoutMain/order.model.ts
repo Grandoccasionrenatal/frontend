@@ -5,10 +5,10 @@ export const orderFormSchema = z.object({
   start_date: z.date(),
   customer_name: z.string().min(1, { message: 'Please enter a valid name' }),
   shipping: z.boolean(),
-  user_location: z.number({ description: 'Please select a delivery location' }),
+  user_location: z.number().optional(),
   deposit_acknowledged: z.literal(true, {
     errorMap: () => ({ message: 'You must acknowledge the non-refundable deposit to continue' })
-  })
+  }).optional()
 });
 
 export const orderSchema = orderFormSchema
