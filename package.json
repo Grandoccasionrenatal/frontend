@@ -72,6 +72,9 @@
     "zod": "^3.21.4",
     "zustand": "^4.4.1"
   },
+  "pnpm": {
+    "neverBuiltDependencies": ["canvas"]
+  },
   "devDependencies": {
     "@types/qs": "^6.9.7",
     "prettier": "^3.0.0",
