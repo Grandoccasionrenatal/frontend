@@ -29,7 +29,7 @@ export async function generateStaticParams() {
 
   return products?.data?.map((i) => ({
     id: `${i?.id}`
-  }));
+  })) ?? [];
 }
 
 export async function generateMetadata(
