@@ -99,7 +99,7 @@ const CheckoutMain = () => {
   }, [getValues('return_date')]);
 
   const shippingTokens = useMemo(() => {
-    if (watch('user_location') && watch('user_location') > 10) {
+    if (watch('user_location') && (watch('user_location') ?? 0) > 10) {
       return {
         isBaseFixedPrice: false,
         total: watch('user_location') * Number(`${process.env.NEXT_PUBLIC_SHIPPING_FEE}`)
