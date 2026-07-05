@@ -111,7 +111,6 @@ const CheckoutMain = () => {
   }, [watch('user_location')]);
 
   const aggregate = useMemo(() => {
-    const vatRate = Number(process.env.NEXT_PUBLIC_VAT_PERCENTAGE!) / 100;
     let subTotalExclVAT = 0;
     let vatAmount = 0;
 
@@ -122,7 +121,8 @@ const CheckoutMain = () => {
       const lineExclVAT = discountedPrice * item.quantity * rentalDays;
       subTotalExclVAT += lineExclVAT;
       if (!item?.product?.attributes?.excl_vat) {
-        vatAmount += lineExclVAT * vatRate;
+        const itemVatRate = (item.product.attributes.vat_rate ?? Number(process.env.NEXT_PUBLIC_VAT_PERCENTAGE!)) / 100;
+        vatAmount += lineExclVAT * itemVatRate;
       }
     });
 
@@ -676,7 +676,7 @@ export const OrderSummary = ({ subtotal, subTotalExclVAT, vatAmount, total, ship
                 <span>{`${CONSTANTS.CURRENCY}${(i?.product?.attributes?.price_per_day - (i?.product?.attributes?.price_per_day * i?.product?.attributes?.discount) / 100).toFixed(2)}`}</span>
               ) : <></>}
               {!i?.product?.attributes?.excl_vat ? (
-                <span className="text-[12px] text-gray-500">+{process.env.NEXT_PUBLIC_VAT_PERCENTAGE}% VAT</span>
+                <span className="text-[12px] text-gray-500">+{i.product.attributes.vat_rate ?? process.env.NEXT_PUBLIC_VAT_PERCENTAGE}% VAT</span>
               ) : <></>}
             </p>
           </div>
@@ -724,6 +724,12 @@ export const OrderSummary = ({ subtotal, subTotalExclVAT, vatAmount, total, ship
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
         The 30% deposit is non-refundable. The remaining balance is due on delivery/pickup.
+      </p>
+      <p className="text-[12px] text-gray-400 flex gap-1 items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+        VAT rates: Marquee hire 13.5% · All other items 23% (Irish VAT regulations)
       </p>
     </div>
   );
