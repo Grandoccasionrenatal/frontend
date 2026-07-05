@@ -18,7 +18,7 @@ async function syncEnquiryToNotion(data: Record<string, string>) {
     'Customer Name': { title: [{ text: { content: data.customer_name || '' } }] },
     'Event Location': { rich_text: [{ text: { content: data.postcode || '' } }] },
     'Items Booked': { rich_text: [{ text: { content: details } }] },
-    'Status': { status: { name: 'Pending' } },
+    'Status': { status: { name: 'Not started' } },
   };
 
   if (data.customer_email) props['Email Address'] = { rich_text: [{ text: { content: data.customer_email } }] };
