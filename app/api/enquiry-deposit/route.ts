@@ -2,12 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://monkfish-app-7liuw.ondigitalocean.app';
 const STRAPI_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN;
+const CLIENT_URL = 'https://www.grandoccasionrental.ie';
 
 export async function POST(req: NextRequest) {
   try {
-    const { amount, customerName, customerEmail, bookingType, eventDate } = await req.json();
+    const { amount, customerName, customerEmail, bookingType, eventDate, phone, postcode, items, source } = await req.json();
 
     const depositAmount = parseFloat((amount * 0.3).toFixed(2));
+
+    const successParams = new URLSearchParams({
+      name: customerName || '',
+      email: customerEmail || '',
+      phone: phone || '',
+      postcode: postcode || '',
+      booking: bookingType || '',
+      date: eventDate || '',
+      total: String(amount),
+      deposit: String(depositAmount),
+      items: (items || '').substring(0, 300),
+      source: source || '',
+    });
+    const success_url = `${CLIENT_URL}/enquiry/success?session_id={CHECKOUT_SESSION_ID}&${successParams.toString()}`;
 
     const body = {
       customer_name: customerName,
@@ -20,6 +35,7 @@ export async function POST(req: NextRequest) {
       address: { line1: '', city: '', state: '', country: 'IE' },
       details: `Enquiry deposit — ${bookingType || 'Event Hire'}`,
       transaction_items: [],
+      success_url,
     };
 
     const res = await fetch(`${STRAPI_URL}/api/transactions`, {

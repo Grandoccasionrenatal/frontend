@@ -62,6 +62,10 @@ export default function EnquiryForm() {
           customerEmail: submittedData.customer_email,
           bookingType: submittedData.booking_type,
           eventDate: submittedData.event_date,
+          phone: submittedData.phone,
+          postcode: submittedData.postcode,
+          items: submittedData.items,
+          source: submittedData.source,
         }),
       });
       const data = await res.json();
