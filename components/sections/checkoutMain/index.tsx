@@ -127,10 +127,11 @@ const CheckoutMain = () => {
     });
 
     const subTotal = subTotalExclVAT + vatAmount;
-    const total = shippingTokens?.total + subTotal;
+    const shippingCost = watch('shipping') ? shippingTokens?.total : 0;
+    const total = shippingCost + subTotal;
     const deposit = total * 0.3;
     const balance = total - deposit;
-    return { subTotalExclVAT, vatAmount, subTotal, shipping: shippingTokens?.total, total, deposit, balance };
+    return { subTotalExclVAT, vatAmount, subTotal, shipping: shippingCost, total, deposit, balance };
   }, [cart, watch('shipping'), rentalDays, watch('user_location'), shippingTokens]);
 
   const onSubmit: SubmitHandler<orderFormSchemaInterface> = (data) => {
