@@ -63,9 +63,15 @@ export default function EnquiryForm() {
           eventDate: submittedData.event_date,
         }),
       });
-      const { url } = await res.json();
-      window.location.href = url;
-    } catch {
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        alert(`Payment error: ${data.error || 'Could not create payment session. Please contact us on 085 156 3498.'}`);
+        setPaymentLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      alert('Something went wrong. Please contact us on 085 156 3498 or info@grandoccasionrental.ie');
       setPaymentLoading(false);
     }
   };
