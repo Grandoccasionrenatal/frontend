@@ -254,92 +254,207 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Schedule automatic review request 3 days after event
+  // Schedule the 4-email sequence around the event date
   if (apiKey && data.auto_review && data.customer_email && data.event_date && !data.skip_email) {
     try {
-      const reviewDate = new Date(`${data.event_date}T10:00:00`);
-      reviewDate.setDate(reviewDate.getDate() + 3);
+      const now = new Date();
+      const eventDate = new Date(`${data.event_date}T10:00:00`);
 
-      const reminderDate = new Date(`${data.event_date}T10:00:00`);
-      reminderDate.setDate(reminderDate.getDate() + 10);
+      const sevenDaysBefore = new Date(eventDate);
+      sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7);
+
+      const threeDaysBefore = new Date(eventDate);
+      threeDaysBefore.setDate(threeDaysBefore.getDate() - 3);
+
+      const oneDayAfter = new Date(eventDate);
+      oneDayAfter.setDate(oneDayAfter.getDate() + 1);
+
+      const eightDaysAfter = new Date(eventDate);
+      eightDaysAfter.setDate(eightDaysAfter.getDate() + 8);
 
       const GOOGLE_REVIEW_URL = 'https://g.page/r/CWa1-VxQj7mIEBM/review';
       const FACEBOOK_REVIEW_URL = 'https://www.facebook.com/p/Grand-Occasion-Rental-61552746878438/reviews';
 
-      const buildReviewHtml = (isReminder: boolean) => `<!DOCTYPE html>
+      const emailHeader = (title: string, subtitle: string) => `
+        <tr>
+          <td style="background:#d96f00;padding:28px 32px;border-radius:10px 10px 0 0;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">${title}</h1>
+            <p style="margin:6px 0 0;color:#ffd9b0;font-size:14px;">${subtitle}</p>
+          </td>
+        </tr>`;
+
+      const emailFooter = `
+        <tr>
+          <td style="background:#fff8f0;padding:16px 32px;border:1px solid #f0e4d0;border-top:none;border-radius:0 0 10px 10px;">
+            <p style="margin:0;font-size:13px;color:#888;">Questions? Reach us at <a href="mailto:info@grandoccasionrental.ie" style="color:#d96f00;">info@grandoccasionrental.ie</a> or WhatsApp <a href="tel:+353851563498" style="color:#d96f00;">085 156 3498</a>.</p>
+            <p style="margin:12px 0 0;font-size:13px;font-weight:600;">Warm regards,<br/>Grand Occasion Rentals</p>
+          </td>
+        </tr>`;
+
+      const wrapEmail = (rows: string) => `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/></head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;color:#1a1a1a;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:24px 0;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-        <tr>
-          <td style="background:#d96f00;padding:28px 32px;border-radius:10px 10px 0 0;text-align:center;">
-            <h1 style="margin:0;color:#fff;font-size:22px;">${isReminder ? 'Just a gentle nudge — we\'d love your feedback!' : 'How did we do? We\'d love your review!'}</h1>
-            <p style="margin:6px 0 0;color:#ffd9b0;font-size:14px;">Grand Occasion Rentals — Ireland's trusted event hire</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
-            <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
-            <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
-              ${isReminder
-                ? `We hope you're still enjoying everything from your recent event! We sent you a message a week ago asking for your thoughts — if you haven't had a chance yet, we'd still really appreciate it.`
-                : `Thank you so much for choosing us for your recent event! We truly hope everything went smoothly and that you and your guests had a wonderful time.`}
-            </p>
-            <p style="margin:16px 0 8px;font-size:14px;color:#444;line-height:1.7;">
-              ${isReminder
-                ? `If you have just a couple of minutes, leaving us a review would mean the world to a small business like ours.`
-                : `If you enjoyed our service, we'd be so grateful if you could spare 2 minutes to leave us a review. It helps other families find us and keeps us going!`}
-            </p>
-            <table cellpadding="0" cellspacing="0" style="margin-top:8px;">
-              <tr>
-                <td style="padding-right:12px;">
-                  <a href="${GOOGLE_REVIEW_URL}" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">⭐ Review on Google</a>
-                </td>
-                <td>
-                  <a href="${FACEBOOK_REVIEW_URL}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">👍 Review on Facebook</a>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#fff8f0;padding:16px 32px;border:1px solid #f0e4d0;border-top:none;border-radius:0 0 10px 10px;">
-            ${isReminder ? '<p style="margin:0 0 8px;font-size:13px;color:#888;">(If you\'ve already left us a review — thank you so much! You can ignore this.)</p>' : ''}
-            <p style="margin:0;font-size:13px;color:#888;">Questions? Reach us at <a href="mailto:info@grandoccasionrental.ie" style="color:#d96f00;">info@grandoccasionrental.ie</a> or <a href="tel:+353851563498" style="color:#d96f00;">085 156 3498</a>.</p>
-            <p style="margin:12px 0 0;font-size:13px;font-weight:600;">Thank you,<br/>Grand Occasion Rentals</p>
-          </td>
-        </tr>
+        ${rows}
       </table>
     </td></tr>
   </table>
 </body></html>`;
 
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-          to: [data.customer_email],
-          subject: `How did we do? We'd love your review! — Grand Occasion Rentals`,
-          html: buildReviewHtml(false),
-          scheduledAt: reviewDate.toISOString(),
-        }),
-      });
+      // Email 1 — 7 days before event: upsell
+      if (sevenDaysBefore > now) {
+        const upsellHtml = wrapEmail(`
+          ${emailHeader('Your event is 1 week away! 🎉', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
+          <tr>
+            <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
+              <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
+              <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                Your event is just <strong>one week away</strong> — how exciting! We hope everything is coming together beautifully.
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                Is there anything else you'd like to add to your order? We have a wide range available — from extra chairs and tables to decorations, soft play packages, and more.
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                Just WhatsApp or call us on <a href="tel:+353851563498" style="color:#d96f00;font-weight:600;">085 156 3498</a> and we'll sort it out for you!
+              </p>
+              <div style="margin-top:20px;">
+                <a href="https://www.grandoccasionrental.ie" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">Browse Our Full Range</a>
+              </div>
+            </td>
+          </tr>
+          ${emailFooter}
+        `);
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+            to: [data.customer_email],
+            subject: `Your event is 1 week away — anything to add? 🎉`,
+            html: upsellHtml,
+            scheduledAt: sevenDaysBefore.toISOString(),
+          }),
+        });
+      }
 
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-          to: [data.customer_email],
-          subject: `A gentle reminder — we'd love your feedback! — Grand Occasion Rentals`,
-          html: buildReviewHtml(true),
-          scheduledAt: reminderDate.toISOString(),
-        }),
-      });
+      // Email 2 — 3 days before event: delivery notice
+      if (threeDaysBefore > now) {
+        const deliveryHtml = wrapEmail(`
+          ${emailHeader('Your event is 3 days away!', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
+          <tr>
+            <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
+              <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
+              <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                Just a friendly reminder that your booking with us is confirmed for <strong>${data.event_date}</strong>. We're looking forward to helping make it a great day!
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                We'll be in touch <strong>the day before your event</strong> to confirm your exact delivery time and let you know when we're on our way.
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                In the meantime, if you have any last-minute questions or changes, please don't hesitate to reach out.
+              </p>
+            </td>
+          </tr>
+          ${emailFooter}
+        `);
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+            to: [data.customer_email],
+            subject: `Your Grand Occasion booking is 3 days away`,
+            html: deliveryHtml,
+            scheduledAt: threeDaysBefore.toISOString(),
+          }),
+        });
+      }
+
+      // Email 3 — 1 day after event: review request
+      if (oneDayAfter > now) {
+        const reviewHtml = wrapEmail(`
+          ${emailHeader('How did we do? We\'d love your review! ⭐', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
+          <tr>
+            <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
+              <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
+              <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                We hope your event was a wonderful success! It was a pleasure working with you.
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                If you enjoyed our service, we'd be so grateful if you could spare 2 minutes to leave us a review. It helps other families find us and means a great deal to our small team!
+              </p>
+              <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="${GOOGLE_REVIEW_URL}" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">⭐ Review on Google</a>
+                  </td>
+                  <td>
+                    <a href="${FACEBOOK_REVIEW_URL}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">👍 Review on Facebook</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ${emailFooter}
+        `);
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+            to: [data.customer_email],
+            subject: `How did we do? We'd love your review! — Grand Occasion Rentals`,
+            html: reviewHtml,
+            scheduledAt: oneDayAfter.toISOString(),
+          }),
+        });
+      }
+
+      // Email 4 — 8 days after event: gentle follow-up if no review yet
+      if (eightDaysAfter > now) {
+        const followUpHtml = wrapEmail(`
+          ${emailHeader('Just a gentle nudge — we\'d love your feedback!', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
+          <tr>
+            <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
+              <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
+              <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                We hope you're still enjoying the memories from your recent event! We reached out a week ago — if you haven't had a chance to leave a review yet, we'd still really appreciate it.
+              </p>
+              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+                It only takes 2 minutes and means the world to a small family business like ours.
+              </p>
+              <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="${GOOGLE_REVIEW_URL}" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">⭐ Review on Google</a>
+                  </td>
+                  <td>
+                    <a href="${FACEBOOK_REVIEW_URL}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">👍 Review on Facebook</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:20px 0 0;font-size:13px;color:#aaa;">(If you've already left us a review — thank you so much! You can ignore this message.)</p>
+            </td>
+          </tr>
+          ${emailFooter}
+        `);
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+            to: [data.customer_email],
+            subject: `A gentle reminder — we'd love your feedback! — Grand Occasion Rentals`,
+            html: followUpHtml,
+            scheduledAt: eightDaysAfter.toISOString(),
+          }),
+        });
+      }
+
     } catch (reviewErr) {
-      console.error('Review scheduling failed:', reviewErr);
+      console.error('Email sequence scheduling failed:', reviewErr);
     }
   }
 
