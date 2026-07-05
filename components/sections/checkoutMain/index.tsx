@@ -111,18 +111,26 @@ const CheckoutMain = () => {
   }, [watch('user_location')]);
 
   const aggregate = useMemo(() => {
-    const subTotal = cart.reduce((acc, item) => {
-      const price = item.product.attributes.price_per_day;
-      const withVATPrice = item?.product?.attributes?.excl_vat
-        ? price
-        : price + (Number(process.env.NEXT_PUBLIC_VAT_PERCENTAGE!) / 100) * price;
-      const discount = item.product.attributes.discount || 0;
-      const discountedPrice = withVATPrice - (withVATPrice * discount) / 100;
-      return acc + discountedPrice * item.quantity * rentalDays;
-    }, 0);
+    const vatRate = Number(process.env.NEXT_PUBLIC_VAT_PERCENTAGE!) / 100;
+    let subTotalExclVAT = 0;
+    let vatAmount = 0;
 
+    cart.forEach((item) => {
+      const price = item.product.attributes.price_per_day;
+      const discount = item.product.attributes.discount || 0;
+      const discountedPrice = price - (price * discount) / 100;
+      const lineExclVAT = discountedPrice * item.quantity * rentalDays;
+      subTotalExclVAT += lineExclVAT;
+      if (!item?.product?.attributes?.excl_vat) {
+        vatAmount += lineExclVAT * vatRate;
+      }
+    });
+
+    const subTotal = subTotalExclVAT + vatAmount;
     const total = shippingTokens?.total + subTotal;
-    return { subTotal, shipping: shippingTokens?.total, total };
+    const deposit = total * 0.3;
+    const balance = total - deposit;
+    return { subTotalExclVAT, vatAmount, subTotal, shipping: shippingTokens?.total, total, deposit, balance };
   }, [cart, watch('shipping'), rentalDays, watch('user_location'), shippingTokens]);
 
   const onSubmit: SubmitHandler<orderFormSchemaInterface> = (data) => {
@@ -275,7 +283,7 @@ const CheckoutMain = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-4 h-4 inline text-orange-1 "
+                      className="w-4 h-4 inline text-orange-1"
                     >
                       <path
                         strokeLinecap="round"
@@ -285,16 +293,19 @@ const CheckoutMain = () => {
                     </svg>
                   </div>
                   <span className="text-center">
-                    {' '}
-                    Half to be paid now and half on delivery/ pickup.
+                    30% deposit ({CONSTANTS.CURRENCY}{Number(aggregate.deposit)?.toFixed(2)}) due today · balance on delivery.
                   </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
                 <CheckoutMain.Summary
                   subtotal={aggregate?.subTotal}
+                  subTotalExclVAT={aggregate?.subTotalExclVAT}
+                  vatAmount={aggregate?.vatAmount}
                   shipping={aggregate?.shipping}
                   total={aggregate?.total}
+                  deposit={aggregate?.deposit}
+                  balance={aggregate?.balance}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -611,8 +622,12 @@ const CheckoutMain = () => {
           <div className="w-full hidden md:flex md:border-l border-l-slate-300 px-12">
             <CheckoutMain.Summary
               subtotal={aggregate?.subTotal}
+              subTotalExclVAT={aggregate?.subTotalExclVAT}
+              vatAmount={aggregate?.vatAmount}
               shipping={aggregate?.shipping}
               total={aggregate?.total}
+              deposit={aggregate?.deposit}
+              balance={aggregate?.balance}
             />
           </div>
         </div>
@@ -625,11 +640,15 @@ export default CheckoutMain;
 
 interface ISummary {
   subtotal: number;
+  subTotalExclVAT?: number;
+  vatAmount?: number;
   shipping?: number;
   total: number;
+  deposit?: number;
+  balance?: number;
 }
 
-export const OrderSummary = ({ subtotal, total, shipping }: ISummary) => {
+export const OrderSummary = ({ subtotal, subTotalExclVAT, vatAmount, total, shipping, deposit, balance }: ISummary) => {
   const { cart } = useCartStore((store) => store);
 
   return (
@@ -637,95 +656,74 @@ export const OrderSummary = ({ subtotal, total, shipping }: ISummary) => {
       {cart?.map((i, idx) => (
         <div key={idx} className="flex items-start justify-between h-max ">
           <div className="flex gap-[4px]">
-            <div className="relative w-[5rem] h-[5rem]  rounded-[.5rem] bg-slate-300 overflow-hidden">
+            <div className="relative w-[5rem] h-[5rem] rounded-[.5rem] bg-slate-300 overflow-hidden">
               <div className="absolute z-10 min-w-6 w-6 h-6 rounded-[50px] bg-orange-1 grid place-items-center top-0 right-0 cursor-pointer">
                 <span className="text-[12px] font-bold">{i?.quantity}</span>
               </div>
               <StrapiImage src={`${i?.product?.attributes?.images?.data[0]?.attributes?.url}`} />
             </div>
             <p className="max-w-[8rem] flex flex-col overflow-hidden truncate text-ellipsis">
-              <span> {i?.product?.attributes?.name}</span>
+              <span>{i?.product?.attributes?.name}</span>
               <span>({i?.product?.attributes?.for})</span>
             </p>
           </div>
           <div className="flex flex-col justify-start h-full gap-1">
             <p className="flex items-center gap-2">
-              <span
-                className={`${
-                  i?.product?.attributes?.discount ? `line-through text-black-1/50` : ``
-                }`}
-              >
-                {CONSTANTS.CURRENCY}
-                {i?.product?.attributes?.price_per_day}
+              <span className={`${i?.product?.attributes?.discount ? `line-through text-black-1/50` : ``}`}>
+                {CONSTANTS.CURRENCY}{i?.product?.attributes?.price_per_day}
               </span>
               {i?.product?.attributes?.discount ? (
-                <span>
-                  {`${CONSTANTS.CURRENCY}${
-                    i?.product?.attributes?.price_per_day -
-                    (i?.product?.attributes?.price_per_day * i?.product?.attributes?.discount) / 100
-                  }`}
-                </span>
-              ) : (
-                <></>
-              )}
+                <span>{`${CONSTANTS.CURRENCY}${(i?.product?.attributes?.price_per_day - (i?.product?.attributes?.price_per_day * i?.product?.attributes?.discount) / 100).toFixed(2)}`}</span>
+              ) : <></>}
               {!i?.product?.attributes?.excl_vat ? (
-                <span>+{process.env.NEXT_PUBLIC_VAT_PERCENTAGE}% VAT</span>
-              ) : (
-                <></>
-              )}
+                <span className="text-[12px] text-gray-500">+{process.env.NEXT_PUBLIC_VAT_PERCENTAGE}% VAT</span>
+              ) : <></>}
             </p>
           </div>
         </div>
       ))}
-      <div className="w-full flex items-center justify-between bg-orange-1/20 rounded-[4px] p-2">
-        <div className="flex flex-col">
-          <span className="text-[14px]">Subtotal</span>
+
+      {/* Price breakdown */}
+      <div className="w-full flex flex-col gap-1 border border-slate-200 rounded-[6px] overflow-hidden text-[14px]">
+        <div className="flex items-center justify-between bg-orange-1/10 px-3 py-2">
+          <span>Items (excl. VAT)</span>
+          <span className="font-[600]">{CONSTANTS.CURRENCY}{Number(subTotalExclVAT ?? subtotal)?.toFixed(2)}</span>
         </div>
-        <span className="font-[600]">
-          {CONSTANTS.CURRENCY}
-          {Number(subtotal)?.toFixed(2)}
-        </span>
-      </div>
-      <div
-        className={`w-full 
-      ${shipping ? `flex` : `hidden`}
-      items-center justify-between bg-orange-1/20 rounded-[4px] p-2`}
-      >
-        <div className="flex flex-col">
-          <span className="text-[14px]">Delivery</span>
+        {(vatAmount ?? 0) > 0 && (
+          <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100">
+            <span className="text-gray-500">VAT ({process.env.NEXT_PUBLIC_VAT_PERCENTAGE}%)</span>
+            <span className="font-[600]">{CONSTANTS.CURRENCY}{Number(vatAmount)?.toFixed(2)}</span>
+          </div>
+        )}
+        {(shipping ?? 0) > 0 && (
+          <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100">
+            <span className="text-gray-500">Delivery</span>
+            <span className="font-[600]">{CONSTANTS.CURRENCY}{Number(shipping)?.toFixed(2)}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between bg-orange-1/20 px-3 py-2 border-t border-slate-200">
+          <span className="font-[700]">Total</span>
+          <span className="font-[700]">{CONSTANTS.CURRENCY}{Number(total)?.toFixed(2)}</span>
         </div>
-        <span className="font-[600]">
-          {CONSTANTS.CURRENCY}
-          {Number(shipping)?.toFixed(2)}
-        </span>
       </div>
-      <div className="w-full flex items-center justify-between bg-orange-1/20 rounded-[4px] p-2">
-        <div className="flex flex-col">
-          <span className="text-[14px]">Total</span>
+
+      {/* Deposit breakdown */}
+      <div className="w-full flex flex-col gap-1 border border-orange-200 rounded-[6px] overflow-hidden text-[14px] bg-orange-50">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-orange-100">
+          <span className="text-orange-700 font-[600]">30% Deposit (due today)</span>
+          <span className="font-[700] text-orange-600">{CONSTANTS.CURRENCY}{Number(deposit ?? total * 0.3)?.toFixed(2)}</span>
         </div>
-        <span className="font-[600]">
-          {CONSTANTS.CURRENCY}
-          {Number(total)?.toFixed(2)}
-        </span>
+        <div className="flex items-center justify-between px-3 py-2">
+          <span className="text-gray-500">Balance due on delivery</span>
+          <span className="font-[600]">{CONSTANTS.CURRENCY}{Number(balance ?? total * 0.7)?.toFixed(2)}</span>
+        </div>
       </div>
-      <p className="font-serif font-[500] text-[14px] md:text-[16px] inline-flex gap-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-8 h-8 inline text-orange-1 "
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-          />
+
+      <p className="text-[12px] text-gray-500 flex gap-1 items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0 text-orange-1 mt-0.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
-        You will be required to pay half ( {CONSTANTS.CURRENCY}
-        {Number(total / 2)?.toFixed(2)}) of the total to initiate this order, the last half of
-        payment would be recieved on delivery/pickup.
+        The 30% deposit is non-refundable. The remaining balance is due on delivery/pickup.
       </p>
     </div>
   );
