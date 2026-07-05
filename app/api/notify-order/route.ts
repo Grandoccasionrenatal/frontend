@@ -88,15 +88,51 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`;
 
+  const autoReplyHtml = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;color:#1a1a1a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:24px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr>
+          <td style="background:#d96f00;padding:28px 32px;border-radius:10px 10px 0 0;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">We've received your order request!</h1>
+            <p style="margin:6px 0 0;color:#ffd9b0;font-size:14px;">Grand Occasion Rentals — Ireland's trusted event hire</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
+            <p style="margin:0;font-size:16px;">Hi <strong>${customer_name}</strong>,</p>
+            <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
+              Thank you for reaching out to Grand Occasion Rentals! We've received your order request and one of our team members will be in touch with you shortly to confirm availability and next steps.
+            </p>
+            <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
+              In the meantime, if you have any urgent questions, feel free to WhatsApp or call us on
+              <a href="tel:+353851563498" style="color:#d96f00;text-decoration:none;font-weight:600;">085 156 3498</a>.
+            </p>
+            <p style="margin:16px 0 0;font-size:14px;color:#444;">We look forward to helping make your event a memorable one!</p>
+            <p style="margin:12px 0 0;font-size:14px;font-weight:600;">Warm regards,<br/>Grand Occasion Rentals</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#fff8f0;padding:16px 32px;border:1px solid #f0e4d0;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#aaa;">© Grand Occasion Rentals · <a href="https://www.grandoccasionrental.ie" style="color:#aaa;">grandoccasionrental.ie</a></p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
   try {
+    // Notify the team
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'Grand Occasion Rental <bookings@grandoccasionrental.ie>',
+        from: 'Grand Occasion Rental <info@grandoccasionrental.ie>',
         to: ['info@grandoccasionrental.ie'],
         reply_to: customer_email,
         subject: `New Booking Enquiry — ${customer_name}`,
@@ -108,6 +144,20 @@ export async function POST(req: NextRequest) {
       const err = await res.json().catch(() => ({}));
       console.error('Resend error:', err);
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    }
+
+    // Auto-reply to customer
+    if (customer_email) {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'Grand Occasion Rental <info@grandoccasionrental.ie>',
+          to: [customer_email],
+          subject: `We've received your order request — Grand Occasion Rentals`,
+          html: autoReplyHtml
+        })
+      }).catch(err => console.error('Auto-reply error:', err));
     }
 
     return NextResponse.json({ ok: true });
