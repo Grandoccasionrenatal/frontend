@@ -1,38 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' });
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://monkfish-app-7liuw.ondigitalocean.app';
+const STRAPI_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN;
 
 export async function POST(req: NextRequest) {
   try {
     const { amount, customerName, customerEmail, bookingType, eventDate } = await req.json();
 
-    const depositAmount = Math.round(amount * 0.3 * 100); // 30% in cents
+    const depositAmount = parseFloat((amount * 0.3).toFixed(2));
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
+    const body = {
+      customer_name: customerName,
       customer_email: customerEmail || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `30% Deposit — ${bookingType || 'Event Hire'}`,
-              description: `Non-refundable deposit for ${customerName}${eventDate ? ` on ${eventDate}` : ''}. Remaining balance due on delivery.`,
-            },
-            unit_amount: depositAmount,
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.grandoccasionrental.ie'}/enquiry?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.grandoccasionrental.ie'}/enquiry?payment=cancelled`,
+      total_price: depositAmount,
+      shipping: false,
+      transaction_date: eventDate || new Date().toISOString().split('T')[0],
+      return_date: eventDate || new Date().toISOString().split('T')[0],
+      distance: 0,
+      address: { line1: '', city: '', state: '', country: 'IE' },
+      details: `Enquiry deposit — ${bookingType || 'Event Hire'}`,
+      transaction_items: [],
+    };
+
+    const res = await fetch(`${STRAPI_URL}/api/transactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
+      },
+      body: JSON.stringify(body),
     });
 
-    return NextResponse.json({ url: session.url });
+    const data = await res.json();
+
+    if (!res.ok || !data?.stripeSession?.id) {
+      console.error('Strapi transaction error:', JSON.stringify(data));
+      return NextResponse.json({ error: data?.error?.message || 'Failed to create payment session' }, { status: 500 });
+    }
+
+    return NextResponse.json({ sessionId: data.stripeSession.id });
   } catch (err: any) {
-    console.error('Stripe enquiry deposit error:', err?.message || err);
+    console.error('Enquiry deposit error:', err?.message || err);
     return NextResponse.json({ error: err?.message || 'Failed to create payment session' }, { status: 500 });
   }
 }

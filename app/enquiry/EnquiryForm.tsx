@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
 
 const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House', 'Chairs & Tables', 'Decoration', 'Mixed'];
 const SOURCES = ['WhatsApp', 'Instagram', 'Softplay Instagram', 'Facebook', 'Facebook Marketplace', 'Gmail', 'Google', 'Friend/Family', 'Walk-in', 'Other'];
@@ -64,12 +65,22 @@ export default function EnquiryForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) {
+      if (!res.ok || !data.sessionId) {
         alert(`Payment error: ${data.error || 'Could not create payment session. Please contact us on 085 156 3498.'}`);
         setPaymentLoading(false);
         return;
       }
-      window.location.href = data.url;
+      const stripe = await loadStripe(`${process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}`);
+      if (!stripe) {
+        alert('Payment system unavailable. Please contact us on 085 156 3498.');
+        setPaymentLoading(false);
+        return;
+      }
+      const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      if (error) {
+        alert(`Payment error: ${error.message}`);
+        setPaymentLoading(false);
+      }
     } catch (err) {
       alert('Something went wrong. Please contact us on 085 156 3498 or info@grandoccasionrental.ie');
       setPaymentLoading(false);
