@@ -96,6 +96,7 @@ export interface productInterface {
       data: productInterface[];
     };
     excl_vat: boolean;
+    vat_rate?: number;
   };
 }
 
