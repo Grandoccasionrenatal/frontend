@@ -33,29 +33,39 @@ export default function EnquirySuccessContent() {
     const storageKey = `booking_confirmed_${sessionId}`;
     if (sessionStorage.getItem(storageKey)) { setEmailSent(true); return; }
     called.current = true;
-    sessionStorage.setItem(storageKey, '1');
 
-    fetch('/api/booking-webhook', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customer_name: name,
-        customer_email: email,
-        phone,
-        reference_code: postcode?.toUpperCase(),
-        items: items || booking,
-        event_date: date,
-        delivery_date: date,
-        pickup_date: pickupDate,
-        event_location: postcode,
-        total_amount: total,
-        deposit_amount: deposit,
-        booking_type: booking,
-        source: source || 'Website Enquiry',
-        auto_review: true,
-      }),
-    })
-      .then(() => setEmailSent(true))
+    // Verify Stripe payment actually completed before sending confirmation
+    fetch(`/api/verify-session?session_id=${sessionId}`)
+      .then(r => r.json())
+      .then(({ paid }) => {
+        if (!paid) {
+          console.warn('Session not paid — skipping confirmation email');
+          return;
+        }
+        sessionStorage.setItem(storageKey, '1');
+        fetch('/api/booking-webhook', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customer_name: name,
+            customer_email: email,
+            phone,
+            reference_code: postcode?.toUpperCase(),
+            items: items || booking,
+            event_date: date,
+            delivery_date: date,
+            pickup_date: pickupDate,
+            event_location: postcode,
+            total_amount: total,
+            deposit_amount: deposit,
+            booking_type: booking,
+            source: source || 'Website Enquiry',
+            auto_review: true,
+          }),
+        })
+          .then(() => setEmailSent(true))
+          .catch(console.error);
+      })
       .catch(console.error);
   }, [sessionId]);
 
