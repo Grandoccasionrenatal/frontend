@@ -19,6 +19,8 @@ const ProfileDrop = () => {
     (store) => store
   );
 
+  const isAdmin = authDetails?.user?.email === 'info@grandoccasionrental.ie';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="hidden md:flex">
@@ -47,18 +49,22 @@ const ProfileDrop = () => {
         <DropdownMenuContent>
           <DropdownMenuLabel>{authDetails?.user?.username}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/internal-booking">Record Booking</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/internal-payment">Generate Payment Link</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/internal-review">Send Review Request</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/enquiry" target="_blank">Booking Details Form</Link>
-          </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/internal-booking">Record Booking</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/internal-payment">Generate Payment Link</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/internal-review">Send Review Request</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/enquiry" target="_blank">Booking Details Form</Link>
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setLogoutOpen(true)}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
