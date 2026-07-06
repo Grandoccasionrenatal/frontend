@@ -7,7 +7,7 @@ const BOOKING_TYPES = ['Marquee', 'Softplay', 'Bouncy Castle and/or Bubble House
 
 export default function BookingForm({ webhookUrl }: { webhookUrl: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [skipEmail, setSkipEmail] = useState(false);
+  const [skipEmail, setSkipEmail] = useState(true);
   const [autoReview, setAutoReview] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
