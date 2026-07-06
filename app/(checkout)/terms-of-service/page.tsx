@@ -18,7 +18,7 @@ const page = () => {
         </h3>
       </div>
       <div className="w-full h-screen flex-grow p-8">
-        <iframe className="w-full h-full" src="/docs/terms_of_Service.html" />
+        <iframe className="w-full h-full" src="/docs/terms_of_service.html" />
       </div>
     </main>
   );
