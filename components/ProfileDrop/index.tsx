@@ -59,6 +59,9 @@ const ProfileDrop = () => {
                 <Link href="/internal-payment">Generate Payment Link</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link href="/internal-modify">Modify Booking</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/internal-review">Send Review Request</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
