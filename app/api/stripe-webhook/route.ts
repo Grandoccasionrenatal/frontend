@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// Must use raw body for Stripe signature verification — disable body parsing
-export const config = { api: { bodyParser: false } };
-
 async function verifyStripeSignature(body: string, signature: string): Promise<boolean> {
   // Manual HMAC-SHA256 verification without the Stripe SDK
   const encoder = new TextEncoder();
