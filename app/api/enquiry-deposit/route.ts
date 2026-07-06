@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: data?.error?.message || 'Failed to create payment session' }, { status: 500 });
     }
 
-    return NextResponse.json({ sessionId: data.stripeSession.id });
+    return NextResponse.json({ sessionId: data.stripeSession.id, checkoutUrl: data.stripeSession.url });
   } catch (err: any) {
     console.error('Enquiry deposit error:', err?.message || err);
     return NextResponse.json({ error: err?.message || 'Failed to create payment session' }, { status: 500 });
