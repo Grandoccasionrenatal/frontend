@@ -19,7 +19,8 @@ const ProfileDrop = () => {
     (store) => store
   );
 
-  const isAdmin = authDetails?.user?.email === 'info@grandoccasionrental.ie';
+  const ADMIN_EMAILS = ['info@grandoccasionrental.ie', 'adedejioluwaseun65@gmail.com'];
+  const isAdmin = ADMIN_EMAILS.includes(authDetails?.user?.email ?? '');
 
   return (
     <DropdownMenu>
