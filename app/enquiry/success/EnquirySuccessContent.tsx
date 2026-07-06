@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function EnquirySuccessContent() {
   const params = useSearchParams();
-  const called = useRef(false);
-  const [emailSent, setEmailSent] = useState(false);
+  const [emailSent] = useState(true); // Email is now sent by Stripe webhook, not this page
 
   const name = params.get('name') || '';
   const email = params.get('email') || '';
@@ -28,46 +27,8 @@ export default function EnquirySuccessContent() {
     return d.toISOString().split('T')[0];
   })();
 
-  useEffect(() => {
-    if (!sessionId || called.current) return;
-    const storageKey = `booking_confirmed_${sessionId}`;
-    if (sessionStorage.getItem(storageKey)) { setEmailSent(true); return; }
-    called.current = true;
-
-    // Verify Stripe payment actually completed before sending confirmation
-    fetch(`/api/verify-session?session_id=${sessionId}`)
-      .then(r => r.json())
-      .then(({ paid }) => {
-        if (!paid) {
-          console.warn('Session not paid — skipping confirmation email');
-          return;
-        }
-        sessionStorage.setItem(storageKey, '1');
-        fetch('/api/booking-webhook', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customer_name: name,
-            customer_email: email,
-            phone,
-            reference_code: postcode?.toUpperCase(),
-            items: items || booking,
-            event_date: date,
-            delivery_date: date,
-            pickup_date: pickupDate,
-            event_location: postcode,
-            total_amount: total,
-            deposit_amount: deposit,
-            booking_type: booking,
-            source: source || 'Website Enquiry',
-            auto_review: true,
-          }),
-        })
-          .then(() => setEmailSent(true))
-          .catch(console.error);
-      })
-      .catch(console.error);
-  }, [sessionId]);
+  // Email confirmation is now triggered by Stripe webhook (stripe-webhook route)
+  // This page just displays the success UI
 
   const balance = (parseFloat(total) - parseFloat(deposit)).toFixed(2);
 

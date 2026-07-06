@@ -36,6 +36,19 @@ export async function POST(req: NextRequest) {
       details: `Enquiry deposit — ${bookingType || 'Event Hire'}`,
       transaction_items: [],
       success_url,
+      // Booking metadata stored on Stripe session — used by webhook to send confirmation
+      metadata: {
+        customer_name: customerName || '',
+        customer_email: customerEmail || '',
+        phone: phone || '',
+        postcode: postcode || '',
+        booking_type: bookingType || '',
+        event_date: eventDate || '',
+        total_amount: String(amount),
+        deposit_amount: String(depositAmount),
+        items: (items || '').substring(0, 200),
+        source: source || 'Website Enquiry',
+      },
     };
 
     const res = await fetch(`${STRAPI_URL}/api/transactions`, {
