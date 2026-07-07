@@ -145,9 +145,45 @@ function buildConfirmationEmail(data: Record<string, string>): string {
 
 const NOTION_DATABASE_ID = '34b22911-78c3-4c8e-a860-de396a0d96a2';
 
+// Check if a booking already exists for this email + event date to prevent duplicates
+async function bookingAlreadyExists(notionKey: string, email: string, eventDate: string): Promise<boolean> {
+  if (!email || !eventDate) return false;
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}/query`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${notionKey}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28',
+      },
+      body: JSON.stringify({
+        filter: {
+          and: [
+            { property: 'Email Address', rich_text: { equals: email } },
+            { property: 'Rental Dates', date: { equals: eventDate } },
+          ],
+        },
+      }),
+    });
+    const data = await res.json();
+    return (data.results?.length || 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function syncToNotion(data: Record<string, string>) {
   const notionKey = process.env.NOTION_API_KEY;
   if (!notionKey) return;
+
+  // Idempotency: skip if booking already exists for this email + event date
+  if (data.customer_email && data.event_date) {
+    const exists = await bookingAlreadyExists(notionKey, data.customer_email, data.event_date);
+    if (exists) {
+      console.log(`Duplicate booking skipped for ${data.customer_email} on ${data.event_date}`);
+      return 'duplicate';
+    }
+  }
 
   const props: Record<string, unknown> = {
     'Customer Name': { title: [{ text: { content: data.customer_name || '' } }] },
@@ -201,9 +237,15 @@ async function syncToNotion(data: Record<string, string>) {
 export async function POST(req: NextRequest) {
   const data = await req.json();
 
-  // Sync directly to Notion (bypasses Make.com which had the wrong database)
+  // Sync to Notion — returns 'duplicate' if booking already exists (idempotency guard)
+  let isDuplicate = false;
   try {
-    await syncToNotion(data);
+    const notionResult = await syncToNotion(data);
+    if (notionResult === 'duplicate') {
+      isDuplicate = true;
+      console.log('Duplicate webhook call detected — skipping email for', data.customer_email);
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
   } catch (err) {
     console.error('Notion sync failed:', err);
   }
