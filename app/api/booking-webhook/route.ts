@@ -172,7 +172,7 @@ async function bookingAlreadyExists(notionKey: string, email: string, eventDate:
   }
 }
 
-async function syncToNotion(data: Record<string, string>) {
+async function syncToNotion(data: Record<string, string>): Promise<'duplicate' | string | undefined> {
   const notionKey = process.env.NOTION_API_KEY;
   if (!notionKey) return;
 
@@ -231,21 +231,25 @@ async function syncToNotion(data: Record<string, string>) {
   if (!res.ok) {
     const err = await res.text();
     console.error('Notion sync error:', err);
+    return;
   }
+
+  const page = await res.json();
+  return page.id as string;
 }
 
 export async function POST(req: NextRequest) {
   const data = await req.json();
 
-  // Sync to Notion — returns 'duplicate' if booking already exists (idempotency guard)
-  let isDuplicate = false;
+  // Sync to Notion — returns page ID on success, 'duplicate' if already exists
+  let notionPageId: string | undefined;
   try {
     const notionResult = await syncToNotion(data);
     if (notionResult === 'duplicate') {
-      isDuplicate = true;
       console.log('Duplicate webhook call detected — skipping email for', data.customer_email);
       return NextResponse.json({ ok: true, duplicate: true });
     }
+    notionPageId = notionResult;
   } catch (err) {
     console.error('Notion sync failed:', err);
   }
@@ -345,8 +349,23 @@ export async function POST(req: NextRequest) {
   </table>
 </body></html>`;
 
+      const scheduledEmails: { id: string; subject: string }[] = [];
+
+      // Minimum gap: don't schedule anything firing within the next 24 hours
+      const minScheduleTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      async function scheduleEmail(payload: Record<string, unknown>) {
+        const r = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const json = await r.json();
+        if (json.id) scheduledEmails.push({ id: json.id, subject: payload.subject as string });
+      }
+
       // Email 1 — 7 days before event: upsell
-      if (sevenDaysBefore > now) {
+      if (sevenDaysBefore > minScheduleTime) {
         const upsellHtml = wrapEmail(`
           ${emailHeader('Your event is 1 week away! 🎉', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
           <tr>
@@ -368,94 +387,59 @@ export async function POST(req: NextRequest) {
           </tr>
           ${emailFooter}
         `);
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-            to: [data.customer_email],
-            subject: `Your event is 1 week away — anything to add? 🎉`,
-            html: upsellHtml,
-            scheduledAt: sevenDaysBefore.toISOString(),
-          }),
+        await scheduleEmail({
+          from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+          to: [data.customer_email],
+          subject: `Your event is 1 week away — anything to add? 🎉`,
+          html: upsellHtml,
+          scheduledAt: sevenDaysBefore.toISOString(),
         });
       }
 
-      // Email 2 — 3 days before event: delivery notice
-      if (threeDaysBefore > now) {
+      // Email 2 — 3 days before event: delivery notice + balance payment option
+      if (threeDaysBefore > minScheduleTime) {
+        const fmtEventDate = (() => {
+          const [y, m, d] = data.event_date.split('-');
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+        })();
+        const balance = (parseFloat(data.total_amount || '0') - parseFloat(data.deposit_amount || '0')).toFixed(2);
+        const balancePayUrl = `https://www.grandoccasionrental.ie/api/pay-balance?name=${encodeURIComponent(data.customer_name)}&email=${encodeURIComponent(data.customer_email)}&amount=${balance}&date=${data.event_date}`;
         const deliveryHtml = wrapEmail(`
-          ${emailHeader('Your event is 3 days away!', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
+          ${emailHeader(`Your event on ${fmtEventDate} is almost here!`, 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
           <tr>
             <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
               <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
               <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
-                Just a friendly reminder that your booking with us is confirmed for <strong>${data.event_date}</strong>. We're looking forward to helping make it a great day!
+                Just a friendly reminder that your booking with us is confirmed for <strong>${fmtEventDate}</strong>. We're looking forward to helping make it a great day!
               </p>
               <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
                 We'll be in touch <strong>the day before your event</strong> to confirm your exact delivery time and let you know when we're on our way.
               </p>
-              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
-                In the meantime, if you have any last-minute questions or changes, please don't hesitate to reach out.
-              </p>
             </td>
           </tr>
-          ${emailFooter}
-        `);
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-            to: [data.customer_email],
-            subject: `Your Grand Occasion booking is 3 days away`,
-            html: deliveryHtml,
-            scheduledAt: threeDaysBefore.toISOString(),
-          }),
-        });
-      }
-
-      // Email 3 — 1 day after event: review request
-      if (oneDayAfter > now) {
-        const reviewHtml = wrapEmail(`
-          ${emailHeader('How did we do? We\'d love your review! ⭐', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
           <tr>
-            <td style="background:#fff;padding:28px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;">
-              <p style="margin:0;font-size:16px;">Hi <strong>${data.customer_name}</strong>,</p>
-              <p style="margin:12px 0 0;font-size:14px;color:#444;line-height:1.7;">
-                We hope your event was a wonderful success! It was a pleasure working with you.
-              </p>
-              <p style="margin:16px 0 0;font-size:14px;color:#444;line-height:1.7;">
-                If you enjoyed our service, we'd be so grateful if you could spare 2 minutes to leave us a review. It helps other families find us and means a great deal to our small team!
-              </p>
-              <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
-                <tr>
-                  <td style="padding-right:12px;">
-                    <a href="${GOOGLE_REVIEW_URL}" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">⭐ Review on Google</a>
-                  </td>
-                  <td>
-                    <a href="${FACEBOOK_REVIEW_URL}" style="display:inline-block;background:#1877f2;color:#fff;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">👍 Review on Facebook</a>
-                  </td>
-                </tr>
-              </table>
+            <td style="background:#fff8f0;padding:20px 32px;border-left:1px solid #e8e0d8;border-right:1px solid #e8e0d8;border-top:1px solid #f0e4d0;">
+              <p style="margin:0 0 6px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#d96f00;">Remaining Balance</p>
+              <p style="margin:0 0 4px;font-size:24px;font-weight:800;color:#1a1a1a;">€${balance}</p>
+              <p style="margin:0 0 16px;font-size:13px;color:#888;">Due on delivery — cash or card accepted. You can also pay securely online before your event:</p>
+              <a href="${balancePayUrl}" style="display:inline-block;background:#d96f00;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;">Pay Balance Online →</a>
+              <p style="margin:12px 0 0;font-size:12px;color:#aaa;">If you prefer to pay cash on delivery, no action needed — we'll collect it when we arrive. If you have already paid your balance, please disregard this — there is no cause for alarm and no further action is required.</p>
             </td>
           </tr>
           ${emailFooter}
         `);
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-            to: [data.customer_email],
-            subject: `How did we do? We'd love your review! — Grand Occasion Rentals`,
-            html: reviewHtml,
-            scheduledAt: oneDayAfter.toISOString(),
-          }),
+        await scheduleEmail({
+          from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+          to: [data.customer_email],
+          subject: `Your Grand Occasion event on ${data.event_date} is almost here!`,
+          html: deliveryHtml,
+          scheduledAt: threeDaysBefore.toISOString(),
         });
       }
 
-      // Email 4 — 8 days after event: gentle follow-up if no review yet
-      if (eightDaysAfter > now) {
+      // Email 3 — 8 days after event: gentle follow-up / review request
+      if (eightDaysAfter > minScheduleTime) {
         const followUpHtml = wrapEmail(`
           ${emailHeader('Just a gentle nudge — we\'d love your feedback!', 'Grand Occasion Rentals — Ireland\'s trusted event hire')}
           <tr>
@@ -482,17 +466,35 @@ export async function POST(req: NextRequest) {
           </tr>
           ${emailFooter}
         `);
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
-            to: [data.customer_email],
-            subject: `A gentle reminder — we'd love your feedback! — Grand Occasion Rentals`,
-            html: followUpHtml,
-            scheduledAt: eightDaysAfter.toISOString(),
-          }),
+        await scheduleEmail({
+          from: 'Grand Occasion Rentals <info@grandoccasionrental.ie>',
+          to: [data.customer_email],
+          subject: `A gentle reminder — we'd love your feedback! — Grand Occasion Rentals`,
+          html: followUpHtml,
+          scheduledAt: eightDaysAfter.toISOString(),
         });
+      }
+
+      // Save scheduled email IDs to Notion so they can be cancelled if needed
+      if (notionPageId && scheduledEmails.length > 0) {
+        const notionKey = process.env.NOTION_API_KEY;
+        if (notionKey) {
+          await fetch(`https://api.notion.com/v1/pages/${notionPageId}`, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${notionKey}`,
+              'Content-Type': 'application/json',
+              'Notion-Version': '2022-06-28',
+            },
+            body: JSON.stringify({
+              properties: {
+                'Scheduled Email IDs': {
+                  rich_text: [{ text: { content: JSON.stringify(scheduledEmails) } }],
+                },
+              },
+            }),
+          }).catch(err => console.error('Failed to save email IDs to Notion:', err));
+        }
       }
 
     } catch (reviewErr) {
