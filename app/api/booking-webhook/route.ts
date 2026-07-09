@@ -354,7 +354,7 @@ export async function POST(req: NextRequest) {
       // Minimum gap: don't schedule anything firing within the next 24 hours
       const minScheduleTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-      async function scheduleEmail(payload: Record<string, unknown>) {
+      const scheduleEmail = async (payload: Record<string, unknown>) => {
         const r = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -362,7 +362,7 @@ export async function POST(req: NextRequest) {
         });
         const json = await r.json();
         if (json.id) scheduledEmails.push({ id: json.id, subject: payload.subject as string });
-      }
+      };
 
       // Email 1 — 7 days before event: upsell
       if (sevenDaysBefore > minScheduleTime) {
