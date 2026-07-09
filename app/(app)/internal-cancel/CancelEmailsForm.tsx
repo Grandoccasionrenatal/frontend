@@ -49,7 +49,7 @@ export default function CancelEmailsForm() {
         body: JSON.stringify({ emailId, pageId }),
       });
       if (res.ok) {
-        setCancelled(prev => new Set([...prev, emailId]));
+        setCancelled(prev => { const s = new Set(prev); s.add(emailId); return s; });
       } else {
         const data = await res.json();
         alert(data.error || 'Failed to cancel email');
