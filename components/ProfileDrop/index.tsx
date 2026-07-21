@@ -65,6 +65,9 @@ const ProfileDrop = () => {
                 <Link href="/internal-review">Send Review Request</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link href="/internal-send-emails">Send Customer Emails</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/internal-cancel">Cancel Scheduled Emails</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
