@@ -94,7 +94,7 @@ const Nav = () => {
         ${navWithBg ? `bg-white/20 backdrop-blur rounded-custom` : `bg-transparent`}
         transition-all duration-500 ease-in-out `}
         >
-          <div className="flex items-center gap-4 lg:gap-x-48 ">
+          <div className="flex items-center gap-4 lg:gap-x-10 ">
 
             <HeroTitle/>
             {/* <Link href={`/`}>
@@ -115,7 +115,7 @@ const Nav = () => {
                               key={idx}
                               className="flex flex-row h-max items-center gap-1 relative group w-max overflow-x-hidden"
                             >
-                              <span className="font-[600] text-[16px]">{i?.title}</span>
+                              <span className="font-[700] text-[16px] text-orange-1">{i?.title}</span>
                               <span
                                 className={`absolute bottom-0  ${
                                   pathname === `/${i?.link}` ? `translate-x-0` : `-translate-x-full`
@@ -193,7 +193,7 @@ const Nav = () => {
                     <Link
                       href={`/${i?.link}`}
                       key={idx}
-                      className="bg-orange-1 text-white text-[14px] font-[600] px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity duration-200"
+                      className="bg-orange-1 text-white text-[14px] font-[700] px-5 py-2 rounded-full hover:opacity-90 transition-opacity duration-200"
                     >
                       {i?.title}
                     </Link>
@@ -201,7 +201,7 @@ const Nav = () => {
                     <Link
                       href={`/${i?.link}`}
                       key={idx}
-                      className="flex flex-row items-center gap-1 relative group w-max overflow-x-hidden"
+                      className="flex flex-row items-center gap-1 relative group w-max overflow-x-hidden text-orange-1 font-[700]"
                     >
                       <span>{i?.title}</span>
                       <span

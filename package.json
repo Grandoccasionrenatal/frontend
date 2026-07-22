@@ -12,6 +12,8 @@
     "prettier:cqheck": "prettier --check --ignore-unknown ."
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "resend": "^3.2.0",
     "stripe": "^14.0.0",
     "@cyntler/react-doc-viewer": "^1.14.1",
     "@react-pdf/renderer": "^3.4.4",
