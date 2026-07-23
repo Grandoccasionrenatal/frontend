@@ -388,6 +388,8 @@ OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the J
 
     if not post_data.get("slug"):
         post_data["slug"] = slugify(post_data["title"])
+    # Append date to guarantee slug uniqueness across daily runs
+    post_data["slug"] = f"{slugify(post_data['slug'])}-{today}"
 
     # Strapi only accepts these 4 category values - remap any extras
     VALID_CATEGORIES = {"event-planning-tips", "product-spotlight", "real-event-showcase", "seasonal-local"}
