@@ -21,15 +21,19 @@ interface Props {
 // export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const products = (await productService.getProducts(
-    qs.stringify({
-      populate: '*'
-    })
-  )) as apiInterface<productInterface[]>;
+  try {
+    const products = (await productService.getProducts(
+      qs.stringify({
+        populate: '*'
+      })
+    )) as apiInterface<productInterface[]>;
 
-  return products?.data?.map((i) => ({
-    id: `${i?.id}`
-  })) ?? [];
+    return products?.data?.map((i) => ({
+      id: `${i?.id}`
+    })) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata(
