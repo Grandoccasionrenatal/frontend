@@ -6,9 +6,13 @@ const CLIENT_URL = 'https://www.grandoccasionrental.ie';
 
 export async function POST(req: NextRequest) {
   try {
-    const { amount, customerName, customerEmail, bookingType, eventDate, phone, postcode, items, source } = await req.json();
+    const { amount, customerName, customerEmail, bookingType, eventDate, phone, postcode, items, source, totalAmount } = await req.json();
 
-    const depositAmount = parseFloat((amount * 0.3).toFixed(2));
+    // amount = actual charge (deposit or full); totalAmount = full booking value
+    const chargeAmount = parseFloat(parseFloat(amount).toFixed(2));
+    const fullTotal = parseFloat(parseFloat(totalAmount || amount).toFixed(2));
+    const depositAmount = parseFloat((fullTotal * 0.3).toFixed(2));
+    const isFullPayment = Math.abs(chargeAmount - fullTotal) < 0.01;
 
     const successParams = new URLSearchParams({
       name: customerName || '',
@@ -17,8 +21,9 @@ export async function POST(req: NextRequest) {
       postcode: postcode || '',
       booking: bookingType || '',
       date: eventDate || '',
-      total: String(amount),
-      deposit: String(depositAmount),
+      total: String(fullTotal),
+      deposit: String(isFullPayment ? fullTotal : depositAmount),
+      full_payment: isFullPayment ? '1' : '0',
       items: (items || '').substring(0, 300),
       source: source || '',
     });
@@ -27,7 +32,7 @@ export async function POST(req: NextRequest) {
     const body = {
       customer_name: customerName,
       customer_email: customerEmail || undefined,
-      total_price: depositAmount,
+      total_price: chargeAmount,
       shipping: false,
       transaction_date: eventDate || new Date().toISOString().split('T')[0],
       return_date: eventDate || new Date().toISOString().split('T')[0],
@@ -44,8 +49,9 @@ export async function POST(req: NextRequest) {
         postcode: postcode || '',
         booking_type: bookingType || '',
         event_date: eventDate || '',
-        total_amount: String(amount),
-        deposit_amount: String(depositAmount),
+        total_amount: String(fullTotal),
+        deposit_amount: String(isFullPayment ? fullTotal : depositAmount),
+        full_payment: isFullPayment ? 'true' : 'false',
         items: (items || '').substring(0, 200),
         source: source || 'Website Enquiry',
       },

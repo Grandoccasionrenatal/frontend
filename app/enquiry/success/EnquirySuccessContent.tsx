@@ -19,6 +19,7 @@ export default function EnquirySuccessContent() {
   const items = params.get('items') || '';
   const source = params.get('source') || '';
   const sessionId = params.get('session_id') || '';
+  const isFullPayment = params.get('full_payment') === '1';
 
   const pickupDate = (() => {
     if (!date) return '';
@@ -49,8 +50,8 @@ export default function EnquirySuccessContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Deposit Received!</h1>
-          <p className="text-gray-500 text-sm mt-1">Your booking is now secured.</p>
+          <h1 className="text-2xl font-bold text-gray-900">{isFullPayment ? 'Payment Received!' : 'Deposit Received!'}</h1>
+          <p className="text-gray-500 text-sm mt-1">{isFullPayment ? 'Your booking is fully paid and confirmed.' : 'Your booking is now secured.'}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
@@ -93,8 +94,8 @@ export default function EnquirySuccessContent() {
               <span className="font-semibold">− €{parseFloat(deposit).toFixed(2)}</span>
             </div>
             <div className="border-t border-orange-200 pt-2 flex justify-between">
-              <span className="font-bold text-gray-800">Balance Due on Delivery</span>
-              <span className="font-bold text-orange-500">€{balance}</span>
+              <span className="font-bold text-gray-800">{isFullPayment ? 'Balance Due on Delivery' : 'Balance Due on Delivery'}</span>
+              <span className="font-bold text-orange-500">{isFullPayment ? '€0.00' : `€${balance}`}</span>
             </div>
           </div>
         </div>

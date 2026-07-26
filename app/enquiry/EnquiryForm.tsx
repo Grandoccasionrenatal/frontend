@@ -62,6 +62,7 @@ export default function EnquiryForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: chargeAmount,
+          totalAmount: total,
           customerName: submittedData.customer_name,
           customerEmail: submittedData.customer_email,
           bookingType: submittedData.booking_type,
