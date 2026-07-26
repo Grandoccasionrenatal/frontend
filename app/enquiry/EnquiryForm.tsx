@@ -12,6 +12,7 @@ export default function EnquiryForm() {
   const [bookingType, setBookingType] = useState('');
   const [submittedData, setSubmittedData] = useState<Record<string, string>>({});
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [payFullAmount, setPayFullAmount] = useState(false);
 
   const showFloorType = bookingType === 'Marquee' || bookingType === 'Mixed';
 
@@ -52,12 +53,15 @@ export default function EnquiryForm() {
 
   const handleStripePayment = async () => {
     setPaymentLoading(true);
+    const total = parseFloat(submittedData.total_amount);
+    const deposit = parseFloat((total * 0.3).toFixed(2));
+    const chargeAmount = payFullAmount ? total : deposit;
     try {
       const res = await fetch('/api/enquiry-deposit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: parseFloat(submittedData.total_amount),
+          amount: chargeAmount,
           customerName: submittedData.customer_name,
           customerEmail: submittedData.customer_email,
           bookingType: submittedData.booking_type,
@@ -93,20 +97,41 @@ export default function EnquiryForm() {
 
   if (status === 'success') {
     const total = parseFloat(submittedData.total_amount || '0');
-    const deposit = (total * 0.3).toFixed(2);
+    const deposit = parseFloat((total * 0.3).toFixed(2));
+    const displayAmount = payFullAmount ? total.toFixed(2) : deposit.toFixed(2);
 
     return (
       <div className="flex flex-col gap-6">
         <div className="text-center py-4">
           <div className="text-4xl mb-3">🎉</div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">Details received!</h2>
-          <p className="text-gray-500 text-sm">To secure your booking, please pay your 30% non-refundable deposit.</p>
+          <p className="text-gray-500 text-sm">Choose how much you'd like to pay to secure your booking.</p>
+        </div>
+
+        {/* Payment option toggle */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setPayFullAmount(false)}
+            className={`flex flex-col items-center gap-1 rounded-xl border-2 p-4 transition-colors duration-200 ${!payFullAmount ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white'}`}
+          >
+            <span className="text-sm font-semibold text-gray-700">Pay Deposit</span>
+            <span className="text-xl font-bold text-orange-500">€{deposit.toFixed(2)}</span>
+            <span className="text-xs text-gray-400">30% · Balance due on delivery</span>
+          </button>
+          <button
+            onClick={() => setPayFullAmount(true)}
+            className={`flex flex-col items-center gap-1 rounded-xl border-2 p-4 transition-colors duration-200 ${payFullAmount ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white'}`}
+          >
+            <span className="text-sm font-semibold text-gray-700">Pay Full Amount</span>
+            <span className="text-xl font-bold text-orange-500">€{total.toFixed(2)}</span>
+            <span className="text-xs text-gray-400">Nothing to pay on delivery</span>
+          </button>
         </div>
 
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
-          <p className="text-sm text-gray-500">Deposit Amount (30% of €{total.toFixed(2)})</p>
-          <p className="text-3xl font-bold text-orange-500 mt-1">€{deposit}</p>
-          <p className="text-xs text-gray-400 mt-1">Non-refundable · Remaining balance due on delivery</p>
+          <p className="text-sm text-gray-500">{payFullAmount ? 'Full payment' : `Deposit (30% of €${total.toFixed(2)})`}</p>
+          <p className="text-3xl font-bold text-orange-500 mt-1">€{displayAmount}</p>
+          <p className="text-xs text-gray-400 mt-1">{payFullAmount ? 'Full payment — nothing due on delivery' : 'Non-refundable · Remaining balance due on delivery'}</p>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -120,7 +145,7 @@ export default function EnquiryForm() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                Pay €{deposit} by Card (Stripe)
+                Pay €{displayAmount} by Card (Stripe)
               </>
             )}
           </button>
@@ -148,7 +173,7 @@ export default function EnquiryForm() {
               <span className="text-gray-400">Reference</span>
               <span className="font-medium text-gray-800">{submittedData.customer_name?.split(' ')[0]} {submittedData.event_date}</span>
               <span className="text-gray-400">Amount</span>
-              <span className="font-bold text-orange-500">€{deposit}</span>
+              <span className="font-bold text-orange-500">€{displayAmount}</span>
             </div>
             <p className="text-xs text-gray-400 mt-2">Please use your name and event date as the payment reference. Send proof of payment to <a href="mailto:info@grandoccasionrental.ie" className="text-orange-500 underline">info@grandoccasionrental.ie</a></p>
           </div>
