@@ -5,8 +5,21 @@ import NavBottomLine from '@/components/navBottomLine';
 import ProductMain from '@/components/sections/ProductMain';
 import { apiInterface, productCategoryInterface, productInterface } from '@/types/api.types';
 import qs from 'qs';
+import type { Metadata } from 'next';
 
 export const revalidate = 60;
+
+export async function generateMetadata(
+  { searchParams }: { searchParams: { category?: string } }
+): Promise<Metadata> {
+  const base = 'https://www.grandoccasionrental.ie/products';
+  const canonical = searchParams?.category
+    ? `${base}?category=${searchParams.category}`
+    : base;
+  return {
+    alternates: { canonical },
+  };
+}
 
 const Product = async () => {
   const productCategoriesData: Promise<apiInterface<productCategoryInterface[]>> =
