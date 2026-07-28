@@ -35,6 +35,30 @@ export function GTMNoScript() {
   );
 }
 
+const GADS_ID = 'AW-11406537038';
+
+export function GoogleAdsScript() {
+  return (
+    <>
+      <Script
+        id="google-ads-script"
+        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtag/js?id=${GADS_ID}`}
+      />
+      <Script
+        id="google-ads-config"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GADS_ID}');`
+        }}
+      />
+    </>
+  );
+}
+
 export function trackEvent(eventName: string, params?: Record<string, any>) {
   if (typeof window !== 'undefined' && (window as any).dataLayer) {
     (window as any).dataLayer.push({ event: eventName, ...params });
