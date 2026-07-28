@@ -3,6 +3,14 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    async redirects() {
+        return [
+            // Deleted product pages — redirect to products listing
+            { source: '/products/72', destination: '/products', permanent: true },
+            { source: '/products/14', destination: '/products', permanent: true },
+            { source: '/products/180', destination: '/products', permanent: true },
+        ];
+    },
     experimental: {
         serverComponentsExternalPackages: ['@react-pdf/renderer'],
     },
