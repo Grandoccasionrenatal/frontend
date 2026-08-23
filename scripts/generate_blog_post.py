@@ -169,7 +169,11 @@ def claude(prompt):
     if not r.ok:
         print("Anthropic API error response:", r.status_code, r.text[:1000])
     r.raise_for_status()
-    return r.json()["content"][0]["text"]
+    data = r.json()
+    for block in data.get("content", []):
+        if block.get("type") == "text":
+            return block["text"]
+    raise RuntimeError(f"No text block in Anthropic response: {json.dumps(data)[:1000]}")
 
 
 # -- Keyword map for Pexels image search -----------------------------------
