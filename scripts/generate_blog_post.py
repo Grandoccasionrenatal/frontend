@@ -390,7 +390,7 @@ OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the J
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
         raw = re.sub(r"\n?```$", "", raw)
 
-    post_data = json.loads(raw.strip())
+    post_data = json.loads(raw.strip(), strict=False)
 
     if not post_data.get("slug"):
         post_data["slug"] = slugify(post_data["title"])
