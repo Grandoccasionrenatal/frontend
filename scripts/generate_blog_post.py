@@ -152,12 +152,35 @@ def strapi_post(data):
     return r.json()
 
 
+BLOG_POST_TOOL = {
+    "name": "publish_blog_post",
+    "description": "Submit the finished blog post fields for publishing.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "title": {"type": "string"},
+            "slug": {"type": "string"},
+            "excerpt": {"type": "string", "description": "Under 160 characters, includes the primary keyword"},
+            "content": {"type": "string", "description": "Full HTML body of the post (h2/h3/p/ul/li, anchor tags for links)"},
+            "category": {
+                "type": "string",
+                "enum": ["seasonal-local", "event-planning-tips", "product-spotlight", "real-event-showcase", "safety-guide"],
+            },
+            "read_time": {"type": "string", "description": "e.g. '4 min read'"},
+        },
+        "required": ["title", "slug", "excerpt", "content", "category", "read_time"],
+    },
+}
+
+
 def claude(prompt):
     r = requests.post(
         "https://api.anthropic.com/v1/messages",
         json={
             "model": "claude-sonnet-5",
             "max_tokens": 4096,
+            "tools": [BLOG_POST_TOOL],
+            "tool_choice": {"type": "tool", "name": "publish_blog_post"},
             "messages": [{"role": "user", "content": prompt}],
         },
         headers={
@@ -171,9 +194,9 @@ def claude(prompt):
     r.raise_for_status()
     data = r.json()
     for block in data.get("content", []):
-        if block.get("type") == "text":
-            return block["text"]
-    raise RuntimeError(f"No text block in Anthropic response: {json.dumps(data)[:1000]}")
+        if block.get("type") == "tool_use":
+            return block["input"]
+    raise RuntimeError(f"No tool_use block in Anthropic response: {json.dumps(data)[:1000]}")
 
 
 # -- Keyword map for Pexels image search -----------------------------------
@@ -374,23 +397,9 @@ INTERNAL LINK: Link naturally to one of these once in the article:
 
 CTA: End with a paragraph inviting readers to call 085 156 3498 or email info@grandoccasionrental.ie
 
-OUTPUT - return ONLY valid JSON, no markdown fences, no commentary outside the JSON:
-{{
-  "title": "...",
-  "slug": "...",
-  "excerpt": "...",
-  "content": "...full HTML...",
-  "category": "seasonal-local|event-planning-tips|product-spotlight|real-event-showcase|safety-guide",
-  "read_time": "X min read"
-}}"""
+Call the publish_blog_post tool with your finished post."""
 
-    raw = claude(prompt)
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = re.sub(r"^```[a-z]*\n?", "", raw)
-        raw = re.sub(r"\n?```$", "", raw)
-
-    post_data = json.loads(raw.strip(), strict=False)
+    post_data = claude(prompt)
 
     if not post_data.get("slug"):
         post_data["slug"] = slugify(post_data["title"])
