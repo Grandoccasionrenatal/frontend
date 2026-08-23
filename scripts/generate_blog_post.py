@@ -156,7 +156,7 @@ def claude(prompt):
     r = requests.post(
         "https://api.anthropic.com/v1/messages",
         json={
-            "model": "claude-opus-4-8",
+            "model": "claude-sonnet-5",
             "max_tokens": 4096,
             "messages": [{"role": "user", "content": prompt}],
         },
@@ -166,6 +166,8 @@ def claude(prompt):
         },
         timeout=90,
     )
+    if not r.ok:
+        print("Anthropic API error response:", r.status_code, r.text[:1000])
     r.raise_for_status()
     return r.json()["content"][0]["text"]
 
