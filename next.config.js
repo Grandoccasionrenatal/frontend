@@ -4,17 +4,19 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     async redirects() {
-       // Deleted product pages — redirect to products listing
-{ source: '/products/2',   destination: '/products', permanent: true },
-{ source: '/products/6',   destination: '/products', permanent: true },
-{ source: '/products/14',  destination: '/products', permanent: true },
-{ source: '/products/19',  destination: '/products', permanent: true },
-{ source: '/products/25',  destination: '/products', permanent: true },
-{ source: '/products/29',  destination: '/products', permanent: true },
-{ source: '/products/72',  destination: '/products', permanent: true },
-{ source: '/products/129', destination: '/products', permanent: true },
-{ source: '/products/159', destination: '/products', permanent: true },
-{ source: '/products/180', destination: '/products', permanent: true },
+        return [
+            // Deleted product pages — redirect to products listing
+            { source: '/products/2',   destination: '/products', permanent: true },
+            { source: '/products/6',   destination: '/products', permanent: true },
+            { source: '/products/14',  destination: '/products', permanent: true },
+            { source: '/products/19',  destination: '/products', permanent: true },
+            { source: '/products/25',  destination: '/products', permanent: true },
+            { source: '/products/29',  destination: '/products', permanent: true },
+            { source: '/products/72',  destination: '/products', permanent: true },
+            { source: '/products/129', destination: '/products', permanent: true },
+            { source: '/products/159', destination: '/products', permanent: true },
+            { source: '/products/180', destination: '/products', permanent: true },
+        ];
     },
     experimental: {
         serverComponentsExternalPackages: ['@react-pdf/renderer'],
